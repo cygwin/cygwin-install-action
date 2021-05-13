@@ -1,0 +1,95 @@
+name: Test
+
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: windows-latest
+    strategy:
+       matrix:
+         include:
+           - platform: 'x86_64'
+           - platform: 'x86'
+             packages: >-
+               coreutils
+               moreutils
+           - platform: 'amd64'
+             packages: |
+               coreutils,
+               moreutils
+       fail-fast: false
+
+    name: 'Test ${{ matrix.platform }}'
+
+    steps:
+    - run: git config --global core.autocrlf input
+
+    - uses: actions/checkout@v2
+
+    - name: Install Cygwin
+      uses: ./
+      with:
+        platform: ${{ matrix.platform }}
+        packages: ${{ matrix.packages }}
+
+    - name: Explicitly running shell
+      run: C:\cygwin\bin\bash -lc "echo 'Explicitly run shell'"
+
+    - name: Single-line inline shell
+      run: echo "Running in $(pwd)"
+      shell: C:\cygwin\bin\bash.exe '{0}'
+
+    - name: Multiline inline shell
+      run: >-
+        echo "Running in $(pwd)" &&
+        true
+      shell: C:\cygwin\bin\bash.exe '{0}'
+
+    - name: Shell script
+      run: C:\cygwin\bin\bash.exe tests/script.sh
+
+    - name: Check requested packages got installed
+      run: C:\cygwin\bin\sponge.exe tmp
+      if: contains(matrix.packages, 'moreutils')
+
+  complex-test:
+    runs-on: windows-latest
+    name: 'Complex Test'
+
+    strategy:
+       matrix:
+         include:
+           - combination: 1
+
+    defaults:
+      run:
+        shell: C:\cygwin\bin\bash.exe --noprofile --norc -o igncr -eo pipefail '{0}'
+
+    steps:
+    - run: git config --global core.autocrlf input
+      shell: pwsh -command ". '{0}'".
+
+    - uses: actions/checkout@v2
+
+    - name: Install Cygwin
+      uses: ./
+
+    - name: Run one
+      run: |
+        echo
+        echo "One"
+        echo
+
+    - name: Run two
+      run: |
+        if [[ '${{ matrix.combination }}' == "${COMBINATION}" ]]; then
+          echo "It's true: ${COMBINATION} satisfied"
+        else
+          exit 1
+        fi
+
+        echo
+        echo "Two"
+        echo
+      env:
+        COMBINATION: 1

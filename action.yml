@@ -1,0 +1,61 @@
+name: Install Cygwin Action
+description: GitHub Action to install Cygwin
+
+inputs:
+  platform:
+    description: Platform [x86, x86_64]
+    required: false
+    default: x86_64
+  packages:
+    description: Packages to install
+    required: false
+
+runs:
+  using: "composite"
+  steps:
+    - run: |
+        $platform = '${{ inputs.platform }}'
+        $platform = $platform -replace '^(x64|amd64)$', 'x86_64'
+        $platform = $platform -replace '^i686$', 'x86'
+        # validate that platform is one of the expected values
+        if (($platform -ne 'x86') -and ($platform -ne 'x86_64')) {
+          echo "unknown platform $platform"
+          exit 1
+        }
+        Invoke-WebRequest https://cygwin.com/setup-$platform.exe -OutFile C:\setup.exe
+      shell: powershell
+
+    - run: |
+        $packages = '${{ inputs.packages }}'
+        $pkg_list = $packages.Split('', [System.StringSplitOptions]::RemoveEmptyEntries)
+        $pkg_list = $pkg_list | % { $_.Trim() }
+        $pkg_list = $pkg_list | % { $_.Trim(',') }
+
+        $args = @(
+         '-qgnO',
+         '-s', 'http://mirrors.kernel.org/sourceware/cygwin/',
+         '-l', 'C:\cygwin-packages',
+         # always install to C:\cygwin rather than the platform dependent
+         # default to make everything simpler
+         '-R', 'C:\cygwin'
+        )
+
+        if ($pkg_list.Count -gt 0) {
+          $args += '-P'
+          $args += $pkg_list -Join(',')
+        }
+
+        # because setup is a Windows GUI app, make it part of a pipeline to make
+        # PowerShell wait for it to exit
+        & C:\setup.exe $args | Out-Default
+      shell: powershell
+
+    - run: |
+        echo "C:\cygwin\bin" >> $env:GITHUB_PATH
+        # run login shell to copy skeleton profile files
+        C:\cygwin\bin\bash.exe --login
+      shell: powershell
+
+branding:
+  color: green
+  icon: terminal
