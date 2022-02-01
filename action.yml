@@ -9,6 +9,12 @@ inputs:
   packages:
     description: Packages to install
     required: false
+  install-dir:
+    # by default, install to C:\cygwin rather than the platform dependent
+    # default to make everything simpler
+    description: Installation directory
+    required: false
+    default: C:\cygwin
 
 runs:
   using: "composite"
@@ -35,9 +41,7 @@ runs:
          '-qgnO',
          '-s', 'http://mirrors.kernel.org/sourceware/cygwin/',
          '-l', 'C:\cygwin-packages',
-         # always install to C:\cygwin rather than the platform dependent
-         # default to make everything simpler
-         '-R', 'C:\cygwin'
+         '-R', '${{ inputs.install-dir }}'
         )
 
         if ($pkg_list.Count -gt 0) {
@@ -51,9 +55,9 @@ runs:
       shell: powershell
 
     - run: |
-        echo "C:\cygwin\bin" >> $env:GITHUB_PATH
+        echo "${{ inputs.install-dir }}\bin" >> $env:GITHUB_PATH
         # run login shell to copy skeleton profile files
-        C:\cygwin\bin\bash.exe --login
+        ${{ inputs.install-dir }}\bin\bash.exe --login
       shell: powershell
 
 branding:
