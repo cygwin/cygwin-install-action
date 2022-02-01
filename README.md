@@ -11,7 +11,7 @@ e.g.
 
     - uses: cygwin/cygwin-install-action@master
 
-    - run: C:\cygwin\bin\bash.exe tests/script.sh
+    - run: bash tests/script.sh  # see footnote [1]
 
 Please fix my terrible cargo-cult PowerShell.
 
@@ -50,8 +50,10 @@ Alternatively, you can also use:
 PATH
 ----
 
-If you want to ensure that PATH only contains Cygwin executables, and other
-stuff installed in the VM image isn't going to get picked up:
+This action prepends Cygwin's /usr/bin directory to the PATH.
+
+However, if you want to ensure that PATH only contains Cygwin executables,
+and other stuff installed in the VM image isn't going to get picked up:
 
 - Set PATH to something like `/usr/bin:$(cygpath ${SYSTEMROOT})/system32` in
   your shell script

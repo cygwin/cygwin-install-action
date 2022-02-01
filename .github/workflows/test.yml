@@ -121,6 +121,12 @@ jobs:
         else
           exit 1
         fi
+
+        if [[ "${OSTYPE}" != "cygwin" ]]; then
+          echo "unexpected OSTYPE ${OSTYPE}"
+          exit 1
+        fi
+
       # Only specify the shell by name; GitHub actions should find the correct
       # executable thanks to the action setting the path appropriately.
       shell: bash
