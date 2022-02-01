@@ -93,3 +93,36 @@ jobs:
         echo
       env:
         COMBINATION: 1
+
+  install-dir-test:
+    runs-on: windows-latest
+    name: 'Check install directory behaviour'
+
+    strategy:
+      matrix:
+        include:
+          - install-dir: C:\tools\cygwin
+          - install-dir: D:\cygwin64
+
+    steps:
+    - run: git config --global core.autocrlf input
+
+    - uses: actions/checkout@v2
+
+    - name: Install Cygwin
+      uses: ./
+      with:
+        install-dir: "${{ matrix.install-dir }}"
+
+    - name: Check working directory
+      run: |
+        if [[ "$(cygpath -aw /)" == '${{ matrix.install-dir }}' ]]; then
+          echo "Installed in $(cygpath -aw /)"
+        else
+          exit 1
+        fi
+      # Only specify the shell by name; GitHub actions should find the correct
+      # executable thanks to the action setting the path appropriately.
+      shell: bash
+      env:
+        SHELLOPTS: igncr
