@@ -18,10 +18,11 @@ Please fix my terrible cargo-cult PowerShell.
 Parameters
 ----------
 
-| Input       | Default | Description
-| ----------- | ------- | -----------
-| platform    | x86_64  | Install the x86 or x86\_64 version of Cygwin.
-| packages    | *none*  | List of additional packages to install.
+| Input       | Default   | Description
+| ----------- | --------- | -----------
+| platform    | x86_64    | Install the x86 or x86\_64 version of Cygwin.
+| packages    | *none*    | List of additional packages to install.
+| install-dir | C:\cygwin | Installation directory
 
 Line endings
 ------------
