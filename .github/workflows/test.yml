@@ -114,7 +114,7 @@ jobs:
       with:
         install-dir: "${{ matrix.install-dir }}"
 
-    - name: Check working directory
+    - name: Check install directory
       run: |
         if [[ "$(cygpath -aw /)" == '${{ matrix.install-dir }}' ]]; then
           echo "Installed in $(cygpath -aw /)"
@@ -132,6 +132,31 @@ jobs:
       shell: bash
       env:
         SHELLOPTS: igncr
+
+  symlink-test:
+    runs-on: windows-latest
+    name: 'Check symlink type control'
+
+    strategy:
+      matrix:
+        include:
+          - symlink-type: native
+          - symlink-type: sys
+          - symlink-type: wsl
+
+    env:
+      CYGWIN: winsymlinks:${{ matrix.symlink-type }}
+
+    steps:
+    - run: git config --global core.autocrlf input
+
+    - uses: actions/checkout@v2
+
+    - name: Install Cygwin
+      uses: ./
+
+    - name: Check symlink
+      run: bash tests/symlink.sh
 
   time-machine:
     runs-on: windows-latest

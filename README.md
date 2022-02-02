@@ -72,12 +72,15 @@ or,
 Symlinks
 --------
 
-Unfortunately, Cygwin's `setup` doesn't (currently) honour
-`CYGWIN=winsymlinks:native` or offer an option to control the kind of symlinks
-created, so some executables (e.g. `python`) are created as Cygwin-style
-symlinks. Since CMD and PowerShell don't understand those symlinks, you cannot
-run those executables directly in a `run:` in your workflow. Execute them via
+Cygwin's `setup` creates Cygwin-style symlinks by default, and some
+executables (e.g. `python`) are symlinks.
+
+Since CMD and PowerShell don't understand those symlinks, you cannot run
+those executables directly in a `run:` in your workflow. Execute them via
 `bash` or `env` instead.
+
+Alternatively, putting e.g. `CYGWIN=winsymlinks:native` into the workflow's
+environment works, since setup now honours that.
 
 Mirrors and signatures
 ----------------------
