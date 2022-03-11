@@ -132,3 +132,54 @@ jobs:
       shell: bash
       env:
         SHELLOPTS: igncr
+
+  time-machine:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+
+    name: 'Test time machine signature'
+
+    steps:
+    - run: git config --global core.autocrlf input
+
+    - uses: actions/checkout@v2
+
+    - name: Install Cygwin
+      uses: ./
+      with:
+        site: http://ctm.crouchingtigerhiddenfruitbat.org/pub/cygwin/circa/64bit/2021/01/22/181752
+        check-sig: false
+
+    - name: Check cygwin version
+      run: |
+        cygcheck -cd cygwin | grep -qF 3.1.7-1
+      shell: C:\cygwin\bin\bash.exe --noprofile --norc -o igncr -eo pipefail '{0}'
+
+  bad-sig:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+
+    name: 'Test failure of time machine signature'
+
+    steps:
+    - run: git config --global core.autocrlf input
+
+    - uses: actions/checkout@v2
+
+    - name: Fail to install Cygwin
+      uses: ./
+      with:
+        site: http://ctm.crouchingtigerhiddenfruitbat.org/pub/cygwin/circa/64bit/2021/01/22/181752
+      continue-on-error: true
+
+    - name: Check Cygwin isn't installed
+      run: |
+        if [[ "${OSTYPE}" = "cygwin" ]]; then
+          echo "Unexpectedly running Cygwin"
+          exit 1
+        fi
+      shell: bash
+      env:
+        SHELLOPTS: igncr
