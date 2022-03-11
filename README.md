@@ -18,11 +18,13 @@ Please fix my terrible cargo-cult PowerShell.
 Parameters
 ----------
 
-| Input       | Default   | Description
-| ----------- | --------- | -----------
-| platform    | x86_64    | Install the x86 or x86\_64 version of Cygwin.
-| packages    | *none*    | List of additional packages to install.
-| install-dir | C:\cygwin | Installation directory
+| Input       | Default                                      | Description
+| ----------- | -------------------------------------------- | -----------
+| platform    | x86_64                                       | Install the x86 or x86\_64 version of Cygwin.
+| packages    | *none*                                       | List of additional packages to install.
+| install-dir | C:\cygwin                                    | Installation directory
+| site        | http://mirrors.kernel.org/sourceware/cygwin/ | Mirror site to install from
+| check-sig   | true                                         | Whether to check the setup.ini signature
 
 Line endings
 ------------
@@ -76,6 +78,15 @@ created, so some executables (e.g. `python`) are created as Cygwin-style
 symlinks. Since CMD and PowerShell don't understand those symlinks, you cannot
 run those executables directly in a `run:` in your workflow. Execute them via
 `bash` or `env` instead.
+
+Mirrors and signatures
+----------------------
+
+You probably don't need to change the setting for `site`, and you shouldn't
+change `check-sig` unless you're very confident it's appropriate and necessary.
+These options are very unlikely to be useful except in some very isolated
+circumstances, such as using the [Cygwin Time
+Machine](http://www.crouchingtigerhiddenfruitbat.org/Cygwin/timemachine.html).
 
 [1] The
 [Workflow documentation](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#exit-codes-and-error-action-preference)

@@ -15,6 +15,14 @@ inputs:
     description: Installation directory
     required: false
     default: C:\cygwin
+  check-sig:
+    description: Should the setup.ini file signature be checked?
+    required: false
+    default: true
+  site:
+    description: Download site URL
+    required: false
+    default: http://mirrors.kernel.org/sourceware/cygwin/
 
 runs:
   using: "composite"
@@ -39,7 +47,7 @@ runs:
 
         $args = @(
          '-qgnO',
-         '-s', 'http://mirrors.kernel.org/sourceware/cygwin/',
+         '-s', '${{ inputs.site }}',
          '-l', 'C:\cygwin-packages',
          '-R', '${{ inputs.install-dir }}'
         )
@@ -47,6 +55,10 @@ runs:
         if ($pkg_list.Count -gt 0) {
           $args += '-P'
           $args += $pkg_list -Join(',')
+        }
+
+        if ('${{ inputs.check-sig }}' -eq $false) {
+          $args += '-X'
         }
 
         # because setup is a Windows GUI app, make it part of a pipeline to make
