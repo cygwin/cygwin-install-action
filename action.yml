@@ -22,7 +22,6 @@ inputs:
   site:
     description: Download site URL
     required: false
-    default: http://mirrors.kernel.org/sourceware/cygwin/
 
 runs:
   using: "composite"
@@ -37,17 +36,26 @@ runs:
           exit 1
         }
         Invoke-WebRequest https://cygwin.com/setup-$platform.exe -OutFile C:\setup.exe
-      shell: powershell
 
-    - run: |
         $packages = '${{ inputs.packages }}'
         $pkg_list = $packages.Split('', [System.StringSplitOptions]::RemoveEmptyEntries)
         $pkg_list = $pkg_list | % { $_.Trim() }
         $pkg_list = $pkg_list | % { $_.Trim(',') }
 
+        # default site if not specified
+        if (! '${{ inputs.site }}' ) {
+          if ($platform -eq 'x86') {
+            $site = 'http://mirrors.kernel.org/sourceware/cygwin-archive/20221123'
+          } else {
+            $site = 'http://mirrors.kernel.org/sourceware/cygwin/'
+          }
+        } else {
+          $site = '${{ inputs.site }}'
+        }
+
         $args = @(
          '-qgnO',
-         '-s', '${{ inputs.site }}',
+         '-s', $site,
          '-l', 'C:\cygwin-packages',
          '-R', '${{ inputs.install-dir }}'
         )
@@ -59,6 +67,10 @@ runs:
 
         if ('${{ inputs.check-sig }}' -eq $false) {
           $args += '-X'
+        }
+
+        if ($platform -eq 'x86') {
+          $args += '--allow-unsupported-windows'
         }
 
         # because setup is a Windows GUI app, make it part of a pipeline to make
