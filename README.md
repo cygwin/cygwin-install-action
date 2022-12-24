@@ -25,6 +25,7 @@ Parameters
 | install-dir | C:\cygwin                                    | Installation directory
 | site        | http://mirrors.kernel.org/sourceware/cygwin/ | Mirror site to install from
 | check-sig   | true                                         | Whether to check the setup.ini signature
+| add-to-path | true                                         | Whether to add Cygwin's `/bin` directory to the system `PATH`
 
 Line endings
 ------------
@@ -52,7 +53,7 @@ Alternatively, you can also use:
 PATH
 ----
 
-This action prepends Cygwin's /usr/bin directory to the PATH.
+By default, this action prepends Cygwin's /usr/bin directory to the PATH.
 
 However, if you want to ensure that PATH only contains Cygwin executables,
 and other stuff installed in the VM image isn't going to get picked up:
@@ -68,6 +69,8 @@ or,
   * `cd ${GITHUB_WORKSPACE}` in your shell script, or
   * prevent the profile script from changing directory by putting
     `CHERE_INVOKING` into the environment
+
+If you want the opposite – the system PATH to remain unchanged by this action – add `add-to-path: false` to the action settings.
 
 Symlinks
 --------
