@@ -22,6 +22,10 @@ inputs:
   site:
     description: Download site URL
     required: false
+  add-to-path:
+    description: Should Cygwin's bin directory be added to the system PATH?
+    required: false
+    default: true
 
 runs:
   using: "composite"
@@ -78,8 +82,11 @@ runs:
         & C:\setup.exe $args | Out-Default
       shell: powershell
 
+    - if: ${{ inputs.add-to-path  == 'true' }}
+      run: echo "${{ inputs.install-dir }}\bin" >> $env:GITHUB_PATH
+      shell: powershell
+
     - run: |
-        echo "${{ inputs.install-dir }}\bin" >> $env:GITHUB_PATH
         # run login shell to copy skeleton profile files
         ${{ inputs.install-dir }}\bin\bash.exe --login
       shell: powershell
