@@ -26,6 +26,7 @@ Parameters
 | site        | http://mirrors.kernel.org/sourceware/cygwin/ | Mirror site to install from
 | check-sig   | true                                         | Whether to check the setup.ini signature
 | add-to-path | true                                         | Whether to add Cygwin's `/bin` directory to the system `PATH`
+| package-cache-key | ''                                     | The key to use for caching downloaded packages.
 
 Line endings
 ------------
@@ -84,6 +85,22 @@ those executables directly in a `run:` in your workflow. Execute them via
 
 Alternatively, putting e.g. `CYGWIN=winsymlinks:native` into the workflow's
 environment works, since setup now honours that.
+
+Caching
+-------
+
+If you're likely to do regular builds, you might want to store the packages
+locally rather than needing to download them from the Cygwin mirrors on every
+build.  Set `package-cache-key` to some string (e.g. `cygwin-package-cache`),
+and the action will use [GitHub's dependency caching][0] to store downloaded
+package files between runs.
+
+[0]: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows
+
+This has the effect of speeding up the run of the installation itself, at the
+expense of taking slightly longer before and after the installation to check
+and potentially update the cache.  The installer will still check for updated
+packages, and will download new packages if the cached ones are out of date
 
 Mirrors and signatures
 ----------------------

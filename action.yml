@@ -26,10 +26,33 @@ inputs:
     description: Should Cygwin's bin directory be added to the system PATH?
     required: false
     default: true
+  package-cache-key:
+    description: Key prefix to use for package caches
+    required: false
+    default: ''
 
 runs:
   using: "composite"
   steps:
+    - uses: actions/cache/restore@v3
+      if: inputs.package-cache-key != ''
+      with:
+        key: ${{ inputs.package-cache-key }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: C:\cygwin-packages
+        restore-keys:
+          ${{ inputs.package-cache-key }}-${{ github.run_id }}-
+          ${{ inputs.package-cache-key }}-
+
+    - if: inputs.package-cache-key != ''
+      working-directory: C:\
+      shell: bash
+      run: |
+        if [[ -d cygwin-packages ]]; then
+          find cygwin-packages -type f ! -name setup.ini -print0 |
+            sort -z |
+            xargs -0 b2sum >cygwin-packages-checksum.old
+        fi
+
     - run: |
         $platform = '${{ inputs.platform }}'
         $platform = $platform -replace '^(x64|amd64)$', 'x86_64'
@@ -81,6 +104,26 @@ runs:
         # PowerShell wait for it to exit
         & C:\setup.exe $args | Out-Default
       shell: powershell
+
+    - if: inputs.package-cache-key != ''
+      id: refresh-cache
+      working-directory: C:\
+      shell: bash
+      run: |
+        if [[ -d cygwin-packages ]]; then
+          find cygwin-packages -type f ! -name setup.ini -print0 |
+            sort -z |
+            xargs -0 b2sum >cygwin-packages-checksum.new
+          if ! diff cygwin-packages-checksum.old cygwin-packages-checksum.new; then
+            printf 'update_package_cache=YesPlease\n' >>"$GITHUB_OUTPUT"
+          fi
+        fi
+
+    - if: steps.refresh-cache.outputs.update_package_cache != ''
+      uses: actions/cache/save@v3
+      with:
+        key: ${{ inputs.package-cache-key }}-${{ github.run_id }}-${{ github.run_attempt }}
+        path: C:\cygwin-packages
 
     - if: ${{ inputs.add-to-path  == 'true' }}
       run: echo "${{ inputs.install-dir }}\bin" >> $env:GITHUB_PATH
