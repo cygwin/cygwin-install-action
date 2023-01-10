@@ -228,34 +228,3 @@ jobs:
       shell: bash
       env:
         SHELLOPTS: igncr
-
-  caching:
-    runs-on: windows-latest
-
-    name: 'Test use of the cache'
-
-    steps:
-      - run: git config --global core.autocrlf input
-      - uses: actions/checkout@v2
-      - name: Install Cygwin and bash-completion
-        uses: ./
-        with:
-          packages: bash-completion
-          package-cache: enabled
-          add-to-path: false
-      - name: Delete Cygwin installation and cache
-        run: |
-          Remove-Item -Force -Recurse C:\cygwin
-          Remove-Item -Force -Recurse C:\cygwin-packages
-      - name: Reinstall Cygwin only
-        uses: ./
-        with:
-          package-cache-key: enabled
-          add-to-path: false
-      - name: Find bash-completion in the package cache
-        shell: C:\cygwin\bin\bash.exe --noprofile --norc -e -o pipefail -o igncr {0}
-        run: |
-          for file in /cygdrive/c/cygwin-packages/*/*/*/bash-completion/bash-completion-*.tar.*; do
-            [[ -f "$file" ]] && exit 0  # File actually exists
-          done
-          exit 1  # No such downloaded file
