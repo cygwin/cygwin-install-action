@@ -241,7 +241,7 @@ jobs:
         uses: ./
         with:
           packages: bash-completion
-          package-cache-key: testing-cache
+          package-cache: enabled
           add-to-path: false
       - name: Delete Cygwin installation and cache
         run: |
@@ -250,7 +250,7 @@ jobs:
       - name: Reinstall Cygwin only
         uses: ./
         with:
-          package-cache-key: testing-cache
+          package-cache-key: enabled
           add-to-path: false
       - name: Find bash-completion in the package cache
         shell: C:\cygwin\bin\bash.exe --noprofile --norc -e -o pipefail -o igncr {0}
