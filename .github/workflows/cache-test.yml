@@ -8,29 +8,9 @@ concurrency: caches
 
 jobs:
   clear-caches:
-    runs-on: ubuntu-latest
+    uses: ./.github/workflows/clear-caches.yml
     permissions:
       actions: write
-    steps:
-      # This will only delete up to 100 caches.  That should be far more than
-      # is ever needed.
-      - name: Delete cache entries
-        uses: actions/github-script@v6
-        with:
-          script: |
-            const response = await github.rest.actions.getActionsCacheList({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              per_page: 100,
-              key: 'cygwin-install-action-packages-'
-            });
-            for (const cache of response.data.actions_caches) {
-              await github.rest.actions.deleteActionsCacheById({
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                cache_id: cache.id
-              });
-            }
 
   test-caching:
     runs-on: windows-latest
