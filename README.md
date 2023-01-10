@@ -18,14 +18,15 @@ Please fix my terrible cargo-cult PowerShell.
 Parameters
 ----------
 
-| Input       | Default                                      | Description
-| ----------- | -------------------------------------------- | -----------
-| platform    | x86_64                                       | Install the x86 or x86\_64 version of Cygwin.
-| packages    | *none*                                       | List of additional packages to install.
-| install-dir | C:\cygwin                                    | Installation directory
-| site        | http://mirrors.kernel.org/sourceware/cygwin/ | Mirror site to install from
-| check-sig   | true                                         | Whether to check the setup.ini signature
-| add-to-path | true                                         | Whether to add Cygwin's `/bin` directory to the system `PATH`
+| Input         | Default                                      | Description
+| ------------- | -------------------------------------------- | -----------
+| platform      | x86_64                                       | Install the x86 or x86\_64 version of Cygwin.
+| packages      | *none*                                       | List of additional packages to install.
+| install-dir   | C:\cygwin                                    | Installation directory
+| site          | http://mirrors.kernel.org/sourceware/cygwin/ | Mirror site to install from
+| check-sig     | true                                         | Whether to check the setup.ini signature
+| add-to-path   | true                                         | Whether to add Cygwin's `/bin` directory to the system `PATH`
+| package-cache | disabled                                     | Whether to cache the package downloads
 
 Line endings
 ------------
@@ -84,6 +85,40 @@ those executables directly in a `run:` in your workflow. Execute them via
 
 Alternatively, putting e.g. `CYGWIN=winsymlinks:native` into the workflow's
 environment works, since setup now honours that.
+
+Caching
+-------
+
+If you're likely to do regular builds, you might want to store the packages
+locally rather than needing to download them from the Cygwin mirrors on every
+build.  Set `package-cache` to `enabled` and the action will use [GitHub's
+dependency caching][0] to store downloaded package files between runs.
+
+[0]: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows
+
+This has the effect of speeding up the run of the installation itself, at the
+expense of taking slightly longer before and after the installation to check
+and potentially update the cache.  The installer will still check for updated
+packages, and will download new packages if the cached ones are out of date
+
+In certain circumstances you might want to ignore any existing caches but still
+store a new one, or restore a cache but not write one.  Do this by setting
+`package-cache` to `saveonly` or `restoreonly` as appropriate.  This is
+particularly useful when calling the action multiple times in the same run,
+where you probably want to restore the cache the first time the action is
+called, then save it the last time it is called.
+
+You should make sure to clear these caches every so often.  This action, like
+the underlying Cygwin installer, doesn't remove old package files from its
+download directory, so if you don't clear the caches occasionally (and you run
+builds often enough that GitHub doesn't do it for you automatically) you'll
+find the caches keep getting larger as they gain more and more outdated and
+unused packages.  Either [delete them manually][1], [use a separate action or
+API call][2], or do occasional runs with `saveonly` to create a fresher small
+cache.
+
+[1]: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#deleting-cache-entries
+[2]: https://docs.github.com/en/actions/using-workflows/caching-dependencies-to-speed-up-workflows#deleting-cache-entries
 
 Mirrors and signatures
 ----------------------

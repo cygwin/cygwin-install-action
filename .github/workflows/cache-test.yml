@@ -1,0 +1,173 @@
+name: Caching tests
+
+on: [push, pull_request]
+
+# Ensure there's only a single version of this running in any repo, so one set
+# of tests won't create or destroy caches that interfere with another run.
+concurrency: caches
+
+jobs:
+  clear-caches:
+    uses: ./.github/workflows/clear-caches.yml
+    permissions:
+      actions: write
+
+  test-caching:
+    runs-on: windows-latest
+
+    needs: clear-caches
+
+    # Ordering is important here to ensure the correct things are in the
+    # correct caches at the correct times.
+    #
+    # This also relies on having six Cygwin packages that don't have any
+    # cross-dependencies (and ideally are small and have few dependencies of
+    # their own), so we can distinguish what's cached at what step.
+    #
+    # We test for the correct behaviour in the following circumstances:
+    #
+    # option      | saves   | restores
+    # ------------+---------+----------
+    # disabled    | no (1)  | no (5)
+    # enabled     | yes (2) | yes (6)
+    # saveonly    | yes (3) | no (7)
+    # restoreonly | no (4)  | yes (8)
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install Cygwin + bash_completion, no caching
+        uses: ./
+        with:
+          packages: bash-completion
+          package-cache: disabled
+
+      - name: Delete the Cygwin installation and downloaded packages
+        run: |
+          Remove-Item -Force -Recurse C:\cygwin
+          Remove-Item -Force -Recurse C:\cygwin-packages
+          Remove-Item -Force -Recurse C:\cygwin-packages-checksum.*
+
+      - name: Install Cygwin + brotli, with caching
+        uses: ./
+        with:
+          packages: brotli
+          package-cache: enabled
+
+      # This assumes 6 and tests 1
+      - name: Ensure bash-completion not downloaded
+        shell: C:\cygwin\bin\bash.exe --noprofile --norc -e -o pipefail -o igncr {0}
+        run: |
+          for file in /cygdrive/c/cygwin-packages/*/*/*/*/bash-completion-*.tar.*; do
+            [[ -f "$file" ]] && exit 1
+          done
+          exit 0
+
+      - name: Delete the Cygwin installation and downloaded packages
+        run: |
+          Remove-Item -Force -Recurse C:\cygwin
+          Remove-Item -Force -Recurse C:\cygwin-packages
+          Remove-Item -Force -Recurse C:\cygwin-packages-checksum.*
+
+      - name: Install Cygwin + libyajl2, with caching
+        uses: ./
+        with:
+          packages: libyajl2
+          package-cache: enabled
+
+      # This tests 2 and 6
+      - name: Ensure brotli downloaded
+        shell: C:\cygwin\bin\bash.exe --noprofile --norc -e -o pipefail -o igncr {0}
+        run: |
+          for file in /cygdrive/c/cygwin-packages/*/*/*/*/brotli-*.tar.*; do
+            [[ -f "$file" ]] && exit 0
+          done
+          exit 1
+
+      - name: Delete the Cygwin installation and downloaded packages
+        run: |
+          Remove-Item -Force -Recurse C:\cygwin
+          Remove-Item -Force -Recurse C:\cygwin-packages
+          Remove-Item -Force -Recurse C:\cygwin-packages-checksum.*
+
+      - name: Install Cygwin + mksh, saveonly
+        uses: ./
+        with:
+          packages: mksh
+          package-cache: saveonly
+
+      # This assumes 2 and tests 7
+      - name: Ensure libyajl2 not downloaded
+        shell: C:\cygwin\bin\bash.exe --noprofile --norc -e -o pipefail -o igncr {0}
+        run: |
+          for file in /cygdrive/c/cygwin-packages/*/*/*/*/libyajl2-*.tar.*; do
+            [[ -f "$file" ]] && exit 1
+          done
+          exit 0
+
+      - name: Delete the Cygwin installation and downloaded packages
+        run: |
+          Remove-Item -Force -Recurse C:\cygwin
+          Remove-Item -Force -Recurse C:\cygwin-packages
+          Remove-Item -Force -Recurse C:\cygwin-packages-checksum.*
+
+      - name: Install Cygwin + libgif7, restoreonly
+        uses: ./
+        with:
+          packages: libgif7
+          package-cache: restoreonly
+
+      # This tests 3 and 8
+      - name: Ensure mksh downloaded
+        shell: C:\cygwin\bin\bash.exe --noprofile --norc -e -o pipefail -o igncr {0}
+        run: |
+          for file in /cygdrive/c/cygwin-packages/*/*/*/*/mksh-*.tar.*; do
+            [[ -f "$file" ]] && exit 1
+          done
+          exit 0
+
+      - name: Delete the Cygwin installation and downloaded packages
+        run: |
+          Remove-Item -Force -Recurse C:\cygwin
+          Remove-Item -Force -Recurse C:\cygwin-packages
+          Remove-Item -Force -Recurse C:\cygwin-packages-checksum.*
+
+      - name: Install Cygwin, restoreonly
+        uses: ./
+        with:
+          package-cache: restoreonly
+
+      # This assumes 8 and tests 4
+      - name: Ensure libgif7 not downloaded
+        shell: C:\cygwin\bin\bash.exe --noprofile --norc -e -o pipefail -o igncr {0}
+        run: |
+          for file in /cygdrive/c/cygwin-packages/*/*/*/*/libgif7-*.tar.*; do
+            [[ -f "$file" ]] && exit 1
+          done
+          exit 0
+
+      - name: Delete the Cygwin installation and downloaded packages
+        run: |
+          Remove-Item -Force -Recurse C:\cygwin
+          Remove-Item -Force -Recurse C:\cygwin-packages
+          Remove-Item -Force -Recurse C:\cygwin-packages-checksum.*
+
+      - name: Install Cygwin, caching disabled
+        uses: ./
+        with:
+          package-cache: disabled
+
+      # This assumes 3 and tests 5
+      - name: Ensure mksh not downloaded
+        shell: C:\cygwin\bin\bash.exe --noprofile --norc -e -o pipefail -o igncr {0}
+        run: |
+          for file in /cygdrive/c/cygwin-packages/*/*/*/*/mksh-*.tar.*; do
+            [[ -f "$file" ]] && exit 1
+          done
+          exit 0
+
+      - name: Delete the Cygwin installation and downloaded packages
+        run: |
+          Remove-Item -Force -Recurse C:\cygwin
+          Remove-Item -Force -Recurse C:\cygwin-packages
+          Remove-Item -Force -Recurse C:\cygwin-packages-checksum.*

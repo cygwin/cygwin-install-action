@@ -26,10 +26,35 @@ inputs:
     description: Should Cygwin's bin directory be added to the system PATH?
     required: false
     default: true
+  package-cache:
+    description: Cache package downloads for speed
+    required: false
+    default: disabled
 
 runs:
   using: "composite"
   steps:
+    - uses: actions/cache/restore@v3
+      if: inputs.package-cache-behaviour == 'enabled' || inputs.package-cache-behaviour == 'restoreonly'
+      with:
+        key: cygwin-install-action-packages-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-${{ github.action }}
+        path: C:\cygwin-packages
+        restore-keys:
+          cygwin-install-action-packages-${{ github.run_id }}-${{ github.job }}-${{ github.run_attempt }}-
+          cygwin-install-action-packages-${{ github.run_id }}-${{ github.job }}-
+          cygwin-install-action-packages-${{ github.run_id }}-
+          cygwin-install-action-packages-
+
+    - if: inputs.package-cache-behaviour == 'enabled' || inputs.package-cache-behaviour == 'restoreonly'
+      working-directory: C:\
+      shell: bash
+      run: |
+        if [[ -d cygwin-packages ]]; then
+          find cygwin-packages -type f ! -name setup.ini -print0 |
+            sort -z |
+            xargs -0 b2sum >cygwin-packages-checksum.old
+        fi
+
     - run: |
         $platform = '${{ inputs.platform }}'
         $platform = $platform -replace '^(x64|amd64)$', 'x86_64'
@@ -81,6 +106,26 @@ runs:
         # PowerShell wait for it to exit
         & C:\setup.exe $args | Out-Default
       shell: powershell
+
+    - if: inputs.package-cache-behaviour == 'enabled' || inputs.package-cache-behaviour == 'saveonly'
+      id: refresh-cache
+      working-directory: C:\
+      shell: bash
+      run: |
+        if [[ -d cygwin-packages ]]; then
+          find cygwin-packages -type f ! -name setup.ini -print0 |
+            sort -z |
+            xargs -0 b2sum >cygwin-packages-checksum.new
+          if ! diff cygwin-packages-checksum.old cygwin-packages-checksum.new; then
+            printf 'update_package_cache=YesPlease\n' >>"$GITHUB_OUTPUT"
+          fi
+        fi
+
+    - if: steps.refresh-cache.outputs.update_package_cache != ''
+      uses: actions/cache/save@v3
+      with:
+        key: cygwin-install-action-packages-${{ github.run_id }}-${{ github.run_attempt }}-${{ github.job }}-${{ github.action }}
+        path: C:\cygwin-packages
 
     - if: ${{ inputs.add-to-path  == 'true' }}
       run: echo "${{ inputs.install-dir }}\bin" >> $env:GITHUB_PATH

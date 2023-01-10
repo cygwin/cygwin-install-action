@@ -1,0 +1,48 @@
+name: Cache performance testing
+
+# Only run manually: the purpose of this test is to check how much (if at all)
+# using the caches helps, and that's not something that needs doing often, and
+# it is something that's time consuming.
+on: workflow_dispatch
+
+# Avoid running at the same time as other actions that interfere with caches,
+# to avoid pollution.
+concurrency: caches
+
+jobs:
+  clear-caches:
+    uses: ./.github/workflows/clear-caches.yml
+    permissions:
+      actions: write
+
+  # There should now be no cache, so we can test how long it takes to do an
+  # install without a cache while building the cache for the later action.
+  install-without-cache:
+    runs-on: windows-latest
+    needs: clear-caches
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install a large set of Cygwin packages
+        uses: ./
+        with:
+          packages: >
+            biber doxygen evolution kde-dev-utils
+            mkvtoolnix-debuginfo nghttp x11vnc
+          package-cache: saveonly
+
+  install-with-cache:
+    runs-on: windows-latest
+    needs: install-without-cache
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Install a large set of Cygwin packages
+        uses: ./
+        with:
+          packages: >
+            biber doxygen evolution kde-dev-utils
+            mkvtoolnix-debuginfo nghttp x11vnc
+          package-cache: enabled
