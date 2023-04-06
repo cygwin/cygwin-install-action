@@ -228,3 +228,32 @@ jobs:
       shell: bash
       env:
         SHELLOPTS: igncr
+
+  multiple-sites-and-pubkeys:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+
+    name: 'Test multiple sites and extra pubkeys'
+
+    steps:
+    - run: git config --global core.autocrlf input
+
+    - uses: actions/checkout@v2
+
+    - name: Run repo HTTP server
+      uses: Eun/http-server-action@v1.0.6
+      with:
+        directory: ${{ github.workspace }}\tests\repo
+
+    - name: Install Cygwin
+      uses: ./
+      with:
+        site: |
+          http://localhost:8080
+          http://mirrors.kernel.org/sourceware/cygwin/
+        packages: cygwin-install-action-test
+        pubkeys: ${{ github.workspace }}\tests\repo\key.pub
+
+    - name: Run test shell script
+      run: C:\cygwin\bin\bash.exe /cygwin-install-action-test.sh

@@ -1,0 +1,4 @@
+category: Debug
+build-depends: cygport
+sdesc: "test"
+ldesc: "test"
