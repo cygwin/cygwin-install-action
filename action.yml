@@ -19,6 +19,9 @@ inputs:
     description: Should the setup.ini file signature be checked?
     required: false
     default: true
+  pubkeys:
+    description: Absolute paths of extra public key files (RFC4880 format), separated by whitespace
+    required: false
   site:
     description: Download site URLs separated by whitespace
     required: false
@@ -74,6 +77,16 @@ runs:
 
         if ('${{ inputs.check-sig }}' -eq $false) {
           $args += '-X'
+        }
+
+        if ( '${{ inputs.pubkeys }}' ) {
+          $pubkeys = '${{ inputs.pubkeys }}'
+          $pubkey_list = $pubkeys.Split('', [System.StringSplitOptions]::RemoveEmptyEntries)
+          $pubkey_list = $pubkey_list | % { $_.Trim() }
+          foreach ($pubkey in $pubkey_list) {
+            $args += '-K'
+            $args += $pubkey
+          }
         }
 
         if ($platform -eq 'x86') {
