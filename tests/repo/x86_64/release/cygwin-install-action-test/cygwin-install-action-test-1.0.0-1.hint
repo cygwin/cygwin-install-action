@@ -1,0 +1,4 @@
+category: Debug
+requires: cygwin
+sdesc: "test"
+ldesc: "test"
