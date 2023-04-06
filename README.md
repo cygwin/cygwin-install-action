@@ -23,7 +23,7 @@ Parameters
 | platform    | x86_64                                       | Install the x86 or x86\_64 version of Cygwin.
 | packages    | *none*                                       | List of additional packages to install.
 | install-dir | C:\cygwin                                    | Installation directory
-| site        | http://mirrors.kernel.org/sourceware/cygwin/ | Mirror site to install from
+| site        | http://mirrors.kernel.org/sourceware/cygwin/ | Mirror sites to install from, separated by whitespace
 | check-sig   | true                                         | Whether to check the setup.ini signature
 | add-to-path | true                                         | Whether to add Cygwin's `/bin` directory to the system `PATH`
 
