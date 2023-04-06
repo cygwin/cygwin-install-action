@@ -20,7 +20,7 @@ inputs:
     required: false
     default: true
   site:
-    description: Download site URL
+    description: Download site URLs separated by whitespace
     required: false
   add-to-path:
     description: Should Cygwin's bin directory be added to the system PATH?
@@ -46,23 +46,26 @@ runs:
         $pkg_list = $pkg_list | % { $_.Trim() }
         $pkg_list = $pkg_list | % { $_.Trim(',') }
 
-        # default site if not specified
-        if (! '${{ inputs.site }}' ) {
-          if ($platform -eq 'x86') {
-            $site = 'http://mirrors.kernel.org/sourceware/cygwin-archive/20221123'
-          } else {
-            $site = 'http://mirrors.kernel.org/sourceware/cygwin/'
-          }
-        } else {
-          $site = '${{ inputs.site }}'
-        }
-
         $args = @(
          '-qgnO',
-         '-s', $site,
          '-l', 'C:\cygwin-packages',
          '-R', '${{ inputs.install-dir }}'
         )
+
+        # default site if not specified
+        if ( '${{ inputs.site }}' ) {
+          $sites = '${{ inputs.site }}'
+        } elseif ($platform -eq 'x86') {
+          $sites = 'http://mirrors.kernel.org/sourceware/cygwin-archive/20221123'
+        } else {
+          $sites = 'http://mirrors.kernel.org/sourceware/cygwin/'
+        }
+        $site_list = $sites.Split('', [System.StringSplitOptions]::RemoveEmptyEntries)
+        $site_list = $site_list | % { $_.Trim() }
+        foreach ($site in $site_list) {
+          $args += '-s'
+          $args += $site
+        }
 
         if ($pkg_list.Count -gt 0) {
           $args += '-P'
