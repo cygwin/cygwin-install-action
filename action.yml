@@ -29,6 +29,10 @@ inputs:
     description: Should Cygwin's bin directory be added to the system PATH?
     required: false
     default: true
+  allow-test-packages:
+    description: Consider package versions marked test
+    required: false
+    default: false
 
 runs:
   using: "composite"
@@ -54,6 +58,10 @@ runs:
          '-l', 'C:\cygwin-packages',
          '-R', '${{ inputs.install-dir }}'
         )
+
+        if ( '${{ inputs.allow-test-packages }}' ) {
+          $args += '-t' # --allow-test-packages
+        }
 
         # default site if not specified
         if ( '${{ inputs.site }}' ) {
