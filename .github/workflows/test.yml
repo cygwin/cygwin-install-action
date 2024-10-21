@@ -24,7 +24,7 @@ jobs:
     steps:
     - run: git config --global core.autocrlf input
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Install Cygwin
       uses: ./
@@ -85,7 +85,7 @@ jobs:
     - run: git config --global core.autocrlf input
       shell: pwsh -command ". '{0}'".
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Install Cygwin
       uses: ./
@@ -123,7 +123,7 @@ jobs:
     steps:
     - run: git config --global core.autocrlf input
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Install Cygwin
       uses: ./
@@ -166,7 +166,7 @@ jobs:
     steps:
     - run: git config --global core.autocrlf input
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Install Cygwin
       uses: ./
@@ -184,7 +184,7 @@ jobs:
     steps:
     - run: git config --global core.autocrlf input
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Install Cygwin
       uses: ./
@@ -207,7 +207,7 @@ jobs:
     steps:
     - run: git config --global core.autocrlf input
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Fail to install Cygwin
       uses: ./
@@ -239,7 +239,7 @@ jobs:
     steps:
     - run: git config --global core.autocrlf input
 
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v4
 
     - name: Run repo HTTP server
       uses: Eun/http-server-action@v1.0.6
