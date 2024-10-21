@@ -28,6 +28,7 @@ Parameters
 | check-sig           | true                                         | Whether to check the setup.ini signature
 | add-to-path         | true                                         | Whether to add Cygwin's `/bin` directory to the system `PATH`
 | allow-test-packages | false                                        | Consider package versions marked test for installation
+| check-hash          | true                                         | Whether to check the hash of the downloaded Cygwin installer.
 
 Line endings
 ------------

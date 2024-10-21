@@ -33,11 +33,16 @@ inputs:
     description: Consider package versions marked test
     required: false
     default: false
+  check-hash:
+    description: Check the hash of the installer
+    required: false
+    default: 'true'
 
 runs:
   using: "composite"
   steps:
     - run: |
+        $ErrorActionPreference = 'Stop'
         $platform = '${{ inputs.platform }}'
         $platform = $platform -replace '^(x64|amd64)$', 'x86_64'
         $platform = $platform -replace '^i686$', 'x86'
@@ -46,7 +51,25 @@ runs:
           echo "unknown platform $platform"
           exit 1
         }
-        Invoke-WebRequest https://cygwin.com/setup-$platform.exe -OutFile C:\setup.exe
+        $setupFileName = "setup-$platform.exe"
+        Invoke-WebRequest "https://cygwin.com/$setupFileName" -OutFile C:\setup.exe
+
+        if ('${{ inputs.check-hash }}'.ToLower() -in @('','true', 'yes', '1', 'on')) {
+          $actualHash = $(Get-FileHash -LiteralPath C:\setup.exe -Algorithm SHA512).Hash
+          $expectedHashLines = $(Invoke-WebRequest -Uri https://cygwin.com/sha512.sum).ToString() -split "`n"
+          foreach ($expectedHashLine in $expectedHashLines) {
+            if ($expectedHashLine -match "^(\S+)\s+(\S+)$") {
+              $expectedHash = $matches[1]
+              $expectedFileName = $matches[2]
+              if ($expectedFileName -ieq $setupFileName) {
+                if ($expectedHash -ine $actualHash) {
+                  throw "Invalid hash of the downloaded setup!`nExpected: $expectedHashLine`nActual  : $actualHash  $expectedFileName"
+                }
+                Write-Host "The downloaded file has the expected hash ($actualHash)"
+              }
+            }
+          }
+        }
 
         $packages = '${{ inputs.packages }}'
         $pkg_list = $packages.Split('', [System.StringSplitOptions]::RemoveEmptyEntries)
