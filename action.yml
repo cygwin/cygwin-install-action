@@ -42,7 +42,12 @@ runs:
           echo "unknown platform $platform"
           exit 1
         }
-        Invoke-WebRequest https://cygwin.com/setup-$platform.exe -OutFile C:\setup.exe
+        # Workaround for https://cygwin.com/pipermail/cygwin/2024-October/256606.html
+        $noCacheSuffix = @(
+          [Guid]::NewGuid(),
+          (Get-Date).Ticks
+        ) -join '@'
+        Invoke-WebRequest "https://cygwin.com/setup-$platform.exe?$noCacheSuffix" -OutFile C:\setup.exe
 
         $packages = '${{ inputs.packages }}'
         $pkg_list = $packages.Split('', [System.StringSplitOptions]::RemoveEmptyEntries)
