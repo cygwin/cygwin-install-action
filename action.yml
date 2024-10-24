@@ -54,19 +54,23 @@ runs:
         $setupFileName = "setup-$platform.exe"
         Invoke-WebRequest "https://cygwin.com/$setupFileName" -OutFile C:\setup.exe
 
-        if ('${{ inputs.check-hash }}'.ToLower() -in @('','true', 'yes', '1', 'on')) {
-          $actualHash = $(Get-FileHash -LiteralPath C:\setup.exe -Algorithm SHA512).Hash
+        if ('${{ inputs.check-hash }}' -eq 'true') {
           $expectedHashLines = $(Invoke-WebRequest -Uri https://cygwin.com/sha512.sum).ToString() -split "`n"
+          $expectedHash = ''
           foreach ($expectedHashLine in $expectedHashLines) {
-            if ($expectedHashLine -match "^(\S+)\s+(\S+)$") {
-              $expectedHash = $matches[1]
-              $expectedFileName = $matches[2]
-              if ($expectedFileName -ieq $setupFileName) {
-                if ($expectedHash -ine $actualHash) {
-                  throw "Invalid hash of the downloaded setup!`nExpected: $expectedHashLine`nActual  : $actualHash  $expectedFileName"
-                }
-                Write-Host "The downloaded file has the expected hash ($actualHash)"
-              }
+            if ($expectedHashLine.EndsWith(" $setupFileName")) {
+              $expectedHash = $($expectedHashLine -split '\s+')[0]
+              break
+            }
+          }
+          if ($expectedHash -eq '') {
+            Write-Output -InputObject "::warning::Unable to find the hash for the file $setupFileName in https://cygwin.com/sha512.sum"
+          } else {
+            $actualHash = $(Get-FileHash -LiteralPath C:\setup.exe -Algorithm SHA512).Hash
+            if ($actualHash -ine $expectedHash) {
+              throw "Invalid hash of the downloaded setup!`nExpected: $expectedHash`nActual  : $actualHash"
+            } else {
+              Write-Output -InputObject "The downloaded file has the expected hash ($expectedHash)"
             }
           }
         }
