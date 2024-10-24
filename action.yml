@@ -18,7 +18,7 @@ inputs:
   check-sig:
     description: Should the setup.ini file signature be checked?
     required: false
-    default: true
+    default: 'true'
   pubkeys:
     description: Absolute paths of extra public key files (RFC4880 format), separated by whitespace
     required: false
@@ -28,11 +28,11 @@ inputs:
   add-to-path:
     description: Should Cygwin's bin directory be added to the system PATH?
     required: false
-    default: true
+    default: 'true'
   allow-test-packages:
     description: Consider package versions marked test
     required: false
-    default: false
+    default: 'false'
   check-hash:
     description: Check the hash of the installer
     required: false
