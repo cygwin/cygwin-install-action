@@ -27,6 +27,7 @@ Parameters
 | pubkeys     | *none*                                       | Absolute paths of extra public key files (RFC4880 format), separated by whitespace
 | check-sig   | true                                         | Whether to check the setup.ini signature
 | add-to-path | true                                         | Whether to add Cygwin's `/bin` directory to the system `PATH`
+| check-hash  | true                                         | Whether to check the hash of the downloaded Cygwin installer.
 
 Line endings
 ------------
