@@ -53,6 +53,9 @@ runs:
         }
         $setupFileName = "setup-$platform.exe"
         Invoke-WebRequest "https://cygwin.com/$setupFileName" -OutFile C:\setup.exe
+        if ((Get-Item -LiteralPath 'C:\setup.exe').Length -eq 0) {
+          throw "The downloaded setup has a zero length!"
+        }
 
         if ('${{ inputs.check-hash }}' -eq 'true') {
           $expectedHashLines = $(Invoke-WebRequest -Uri https://cygwin.com/sha512.sum).ToString() -split "`n"
