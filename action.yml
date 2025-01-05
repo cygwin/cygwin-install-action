@@ -50,7 +50,7 @@ runs:
         $pkg_list = $pkg_list | % { $_.Trim(',') }
 
         $args = @(
-         '-qgnO',
+         '-qnO',
          '-l', 'C:\cygwin-packages',
          '-R', '${{ inputs.install-dir }}'
         )
