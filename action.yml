@@ -18,7 +18,7 @@ inputs:
   check-sig:
     description: Should the setup.ini file signature be checked?
     required: false
-    default: true
+    default: 'true'
   pubkeys:
     description: Absolute paths of extra public key files (RFC4880 format), separated by whitespace
     required: false
@@ -28,16 +28,21 @@ inputs:
   add-to-path:
     description: Should Cygwin's bin directory be added to the system PATH?
     required: false
-    default: true
+    default: 'true'
   allow-test-packages:
     description: Consider package versions marked test
     required: false
-    default: false
+    default: 'false'
+  check-hash:
+    description: Check the hash of the installer
+    required: false
+    default: 'true'
 
 runs:
   using: "composite"
   steps:
     - run: |
+        $ErrorActionPreference = 'Stop'
         $platform = '${{ inputs.platform }}'
         $platform = $platform -replace '^(x64|amd64)$', 'x86_64'
         $platform = $platform -replace '^i686$', 'x86'
@@ -46,7 +51,32 @@ runs:
           echo "unknown platform $platform"
           exit 1
         }
-        Invoke-WebRequest https://cygwin.com/setup-$platform.exe -OutFile C:\setup.exe
+        $setupFileName = "setup-$platform.exe"
+        Invoke-WebRequest "https://cygwin.com/$setupFileName" -OutFile C:\setup.exe
+        if ((Get-Item -LiteralPath 'C:\setup.exe').Length -eq 0) {
+          throw "The downloaded setup has a zero length!"
+        }
+
+        if ('${{ inputs.check-hash }}' -eq 'true') {
+          $expectedHashLines = $(Invoke-WebRequest -Uri https://cygwin.com/sha512.sum).ToString() -split "`n"
+          $expectedHash = ''
+          foreach ($expectedHashLine in $expectedHashLines) {
+            if ($expectedHashLine.EndsWith(" $setupFileName")) {
+              $expectedHash = $($expectedHashLine -split '\s+')[0]
+              break
+            }
+          }
+          if ($expectedHash -eq '') {
+            Write-Output -InputObject "::warning::Unable to find the hash for the file $setupFileName in https://cygwin.com/sha512.sum"
+          } else {
+            $actualHash = $(Get-FileHash -LiteralPath C:\setup.exe -Algorithm SHA512).Hash
+            if ($actualHash -ine $expectedHash) {
+              throw "Invalid hash of the downloaded setup!`nExpected: $expectedHash`nActual  : $actualHash"
+            } else {
+              Write-Output -InputObject "The downloaded file has the expected hash ($expectedHash)"
+            }
+          }
+        }
 
         $packages = '${{ inputs.packages }}'
         $pkg_list = $packages.Split('', [System.StringSplitOptions]::RemoveEmptyEntries)
