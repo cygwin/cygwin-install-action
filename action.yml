@@ -89,7 +89,7 @@ runs:
          '-R', '${{ inputs.install-dir }}'
         )
 
-        if ( '${{ inputs.allow-test-packages }}' ) {
+        if ( '${{ inputs.allow-test-packages }}' -eq 'true' ) {
           $args += '-t' # --allow-test-packages
         }
 
