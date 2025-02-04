@@ -50,8 +50,8 @@ newlines.
 
 Alternatively, you can also use:
 
-- `igncr` in the `SHELLOPTS` environment variable
 - invoke `bash` with `-o igncr`
+- `igncr` in the `SHELLOPTS` environment variable (**Warning:** by default, `SHELLOPTS` is a shell variable and moving it to the environment causes all shell options to propagate to child shells)
 
 PATH
 ----
