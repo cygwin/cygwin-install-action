@@ -29,6 +29,10 @@ inputs:
     description: Should Cygwin's bin directory be added to the system PATH?
     required: false
     default: 'true'
+  packages-dir:
+    description: Packages directory
+    required: false
+    default: C:\cygwin-packages
   allow-test-packages:
     description: Consider package versions marked test
     required: false
@@ -85,7 +89,7 @@ runs:
 
         $args = @(
          '-qnO',
-         '-l', 'C:\cygwin-packages',
+         '-l', '${{ inputs.packages-dir }}',
          '-R', '${{ inputs.install-dir }}'
         )
 
