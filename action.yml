@@ -67,7 +67,28 @@ runs:
 
         $setupExe = "$vol\setup.exe"
         $setupFileName = "setup-$platform.exe"
-        Invoke-WebRequest "https://cygwin.com/$setupFileName" -OutFile $setupExe
+
+        $maxRetries = 5
+        $retryCount = 0
+        $success = $false
+        $delay = 2
+
+        while (-not $success -and $retryCount -lt $maxRetries) {
+          try {
+            Invoke-WebRequest -Uri "https://cygwin.com/$setupFileName" -OutFile $setupExe
+            $success = $true
+          } catch {
+            Write-Output "Attempt $($retryCount + 1) failed. Retrying..."
+            Start-Sleep -Seconds $delay
+            $retryCount++
+            $delay += $delay
+          }
+        }
+
+        if (-not $success) {
+          throw "Failed to download $setupFileName after $maxRetries attempts."
+        }
+
         if ((Get-Item -LiteralPath $setupExe).Length -eq 0) {
           throw "The downloaded setup has a zero length!"
         }
