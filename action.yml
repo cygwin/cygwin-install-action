@@ -12,9 +12,9 @@ inputs:
   install-dir:
     # by default, install to C:\cygwin rather than the platform dependent
     # default to make everything simpler
-    description: Installation directory
+    description: Installation directory (overrides work-vol)
     required: false
-    default: C:\cygwin
+    default: ''
   check-sig:
     description: Should the setup.ini file signature be checked?
     required: false
@@ -37,6 +37,10 @@ inputs:
     description: Check the hash of the installer
     required: false
     default: 'true'
+  work-vol:
+    description: Volume on which to store setup and packages, and install Cygwin
+    required: false
+    default: 'C:'
 
 runs:
   using: "composite"
@@ -51,9 +55,11 @@ runs:
           echo "unknown platform $platform"
           exit 1
         }
+        $vol = '${{ inputs.work-vol }}'
+        $setupExe = "$vol\setup.exe"
         $setupFileName = "setup-$platform.exe"
-        Invoke-WebRequest "https://cygwin.com/$setupFileName" -OutFile C:\setup.exe
-        if ((Get-Item -LiteralPath 'C:\setup.exe').Length -eq 0) {
+        Invoke-WebRequest "https://cygwin.com/$setupFileName" -OutFile $setupExe
+        if ((Get-Item -LiteralPath $setupExe).Length -eq 0) {
           throw "The downloaded setup has a zero length!"
         }
 
@@ -69,13 +75,18 @@ runs:
           if ($expectedHash -eq '') {
             Write-Output -InputObject "::warning::Unable to find the hash for the file $setupFileName in https://cygwin.com/sha512.sum"
           } else {
-            $actualHash = $(Get-FileHash -LiteralPath C:\setup.exe -Algorithm SHA512).Hash
+            $actualHash = $(Get-FileHash -LiteralPath $setupExe -Algorithm SHA512).Hash
             if ($actualHash -ine $expectedHash) {
               throw "Invalid hash of the downloaded setup!`nExpected: $expectedHash`nActual  : $actualHash"
             } else {
               Write-Output -InputObject "The downloaded file has the expected hash ($expectedHash)"
             }
           }
+        }
+
+        $installDir = "$vol\cygwin"
+        if ('${{ inputs.install-dir }}' -ne '') {
+          $installDir = '${{ inputs.install-dir }}'
         }
 
         $packages = '${{ inputs.packages }}'
@@ -85,8 +96,8 @@ runs:
 
         $args = @(
          '-qnO',
-         '-l', 'C:\cygwin-packages',
-         '-R', '${{ inputs.install-dir }}'
+         '-l', "$vol\cygwin-packages",
+         '-R', "$installDir"
         )
 
         if ( '${{ inputs.allow-test-packages }}' -eq 'true' ) {
@@ -133,16 +144,14 @@ runs:
 
         # because setup is a Windows GUI app, make it part of a pipeline to make
         # PowerShell wait for it to exit
-        & C:\setup.exe $args | Out-Default
-      shell: powershell
+        & $setupExe $args | Out-Default
 
-    - if: ${{ inputs.add-to-path  == 'true' }}
-      run: echo "${{ inputs.install-dir }}\bin" >> $env:GITHUB_PATH
-      shell: powershell
+        if ('${{ inputs.add-to-path }}' -eq 'true') {
+          echo "$installDir\bin" >> $env:GITHUB_PATH
+        }
 
-    - run: |
         # run login shell to copy skeleton profile files
-        ${{ inputs.install-dir }}\bin\bash.exe --login
+        & "$installDir\bin\bash.exe" --login
       shell: powershell
 
 branding:
