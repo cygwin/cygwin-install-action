@@ -59,11 +59,7 @@ runs:
         $vol = '${{ inputs.work-vol }}'
         # If temporary drive D: doesn't exist in the VM, fallback to C:
         if ("$vol" -eq '') {
-          if (Test-Path -LiteralPath 'D:\') {
-            $vol = 'D:'
-            } else {
-            $vol = 'C:'
-            }
+          $vol = (Test-Path -LiteralPath 'D:\') ? 'D:' : 'C:'
         }
 
         $setupExe = "$vol\setup.exe"
@@ -94,10 +90,7 @@ runs:
           }
         }
 
-        $installDir = "$vol\cygwin"
-        if ('${{ inputs.install-dir }}' -ne '') {
-          $installDir = '${{ inputs.install-dir }}'
-        }
+        $installDir = '${{ inputs.install-dir }}' -ne '' ? '${{ inputs.install-dir }}' : "$vol\cygwin"
 
         $args = @(
          '-qnO',
