@@ -33,6 +33,8 @@ Parameters
 Line endings
 ------------
 
+### in the checkout
+
 If you're going to use `actions/checkout` in your workflow, you should
 precede that with
 
@@ -41,6 +43,8 @@ precede that with
 to ensure that any shell scripts etc. in your repository don't get checked out
 with `\r\n` line endings (leading to `'\r': command not found` errors).
 
+### in the workflow
+
 Likewise, if you have multiple lines of shell script in a YAML block for `run:`
 in your workflow file, the file this is written into on the runner ends up with
 `\r\n` line endings.
@@ -48,10 +52,13 @@ in your workflow file, the file this is written into on the runner ends up with
 You can use `>-` (rather than `|`) to ensure that it doesn't contain any
 newlines.
 
-Alternatively, you can also use:
+Alternatively, you can invoke `bash` with `-o igncr`.
 
-- invoke `bash` with `-o igncr`
-- `igncr` in the `SHELLOPTS` environment variable (**Warning:** by default, `SHELLOPTS` is a shell variable and moving it to the environment causes all shell options to propagate to child shells)
+**Warning:**
+Putting `igncr` in the `SHELLOPTS` environment variable seems like it should
+have the same effect, but this can have unintended side-effects (by default,
+`SHELLOPTS` is a shell variable and moving it to the environment causes **all**
+shell options to propagate to child shells).
 
 PATH
 ----
