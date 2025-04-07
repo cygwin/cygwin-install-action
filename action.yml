@@ -10,8 +10,8 @@ inputs:
     description: Packages to install
     required: false
   install-dir:
-    # by default, install to C:\cygwin rather than the platform dependent
-    # default to make everything simpler
+    # For consistency and simplicity, install to <work-dir>:\cygwin rather
+    # than to the platform dependent default (e.g. <work-dir>:\cygwin64)
     description: Installation directory (overrides work-vol)
     required: false
     default: ''
@@ -40,7 +40,7 @@ inputs:
   work-vol:
     description: Volume on which to store setup and packages, and install Cygwin
     required: false
-    default: 'C:'
+    default: ''
 
 runs:
   using: "composite"
@@ -55,7 +55,17 @@ runs:
           echo "unknown platform $platform"
           exit 1
         }
+
         $vol = '${{ inputs.work-vol }}'
+        # If temporary drive D: doesn't exist in the VM, fallback to C:
+        if ("$vol" -eq '') {
+          if (Test-Path -LiteralPath 'D:\') {
+            $vol = 'D:'
+            } else {
+            $vol = 'C:'
+            }
+        }
+
         $setupExe = "$vol\setup.exe"
         $setupFileName = "setup-$platform.exe"
         Invoke-WebRequest "https://cygwin.com/$setupFileName" -OutFile $setupExe
@@ -145,6 +155,12 @@ runs:
         # because setup is a Windows GUI app, make it part of a pipeline to make
         # PowerShell wait for it to exit
         & $setupExe $args | Out-Default
+
+        if ('${{ inputs.work-vol }}' -eq '' -and '${{ inputs.install-dir }}' -eq '') {
+          # Create a symlink for compatibility with previous versions of this
+          # action, just in case something relies upon C:\cygwin existing
+          cmd /c mklink /d C:\cygwin $installDir
+        }
 
         if ('${{ inputs.add-to-path }}' -eq 'true') {
           echo "$installDir\bin" >> $env:GITHUB_PATH
