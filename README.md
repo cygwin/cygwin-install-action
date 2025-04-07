@@ -29,6 +29,7 @@ Parameters
 | add-to-path         | true                                         | Whether to add Cygwin's `/bin` directory to the system `PATH`
 | allow-test-packages | false                                        | Consider package versions marked test for installation
 | check-hash          | true                                         | Whether to check the hash of the downloaded Cygwin installer.
+| check-installer-sig | true                                         | Whether to check the Authenticode signature of the downloaded Cygwin installer.
 | work-vol            | D:                                           | Volume on which to store setup and packages, and install Cygwin.
 
 Line endings
@@ -100,7 +101,9 @@ Mirrors and signatures
 ----------------------
 
 You probably don't need to change the setting for `site`, and you shouldn't
-change `check-sig` unless you're very confident it's appropriate and necessary.
+change `check-installer-sig` or `check-sig` unless you're very confident it's
+appropriate and necessary.
+
 These options are very unlikely to be useful except in some very isolated
 circumstances, such as using the [Cygwin Time
 Machine](http://www.crouchingtigerhiddenfruitbat.org/Cygwin/timemachine.html).

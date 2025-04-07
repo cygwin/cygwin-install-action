@@ -37,6 +37,10 @@ inputs:
     description: Check the hash of the installer
     required: false
     default: 'true'
+  check-installer-sig:
+    description: Check the Autheticode signature of the installer
+    required: false
+    default: 'true'
   work-vol:
     description: Volume on which to store setup and packages, and install Cygwin
     required: false
@@ -100,6 +104,15 @@ runs:
 
         if ((Get-Item -LiteralPath $setupExe).Length -eq 0) {
           throw "The downloaded setup has a zero length!"
+        }
+
+        $signature = Get-AuthenticodeSignature -FilePath $setupExe
+        echo "Signature status: $($signature.Status) fingerprint: $($signature.SignerCertificate.GetCertHashString("SHA256"))"
+        # TBD: this should check against a list of fingerprints for valid certs we have used
+        if (!$signature.Status -ne 'Valid' -or $signature.SignerCertificate.GetCertHashString("SHA256") -ne '2ce11da3a675a9d631e06a28ddfd6f730b9cc6989b43bd30ad7cc79d219cf2bd') {
+          if ('${{ inputs.check-installer-sig }}' -eq 'true') {
+              throw "Invalid CodeSign signature on the downloaded setup!"
+          }
         }
 
         if ('${{ inputs.check-hash }}' -eq 'true') {
