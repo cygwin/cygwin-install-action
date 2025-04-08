@@ -52,8 +52,7 @@ runs:
         $platform = $platform -replace '^i686$', 'x86'
         # validate that platform is one of the expected values
         if (($platform -ne 'x86') -and ($platform -ne 'x86_64')) {
-          echo "unknown platform $platform"
-          exit 1
+          throw "Unknown platform $platform."
         }
 
         $vol = '${{ inputs.work-vol }}'
