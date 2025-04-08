@@ -34,23 +34,26 @@ jobs:
         add-to-path: false
 
     - name: Explicitly running shell
-      run: C:\cygwin\bin\bash -lc "echo 'Explicitly run shell'"
+      run: D:\cygwin\bin\bash -lc "echo 'Explicitly run shell'"
+
+    - name: Explicitly running shell via compat symlink
+      run: C:\cygwin\bin\bash -lc "echo 'Explicitly run shell (compat)'"
 
     - name: Single-line inline shell
       run: echo "Running in $(pwd)"
-      shell: C:\cygwin\bin\bash.exe '{0}'
+      shell: D:\cygwin\bin\bash.exe '{0}'
 
     - name: Multiline inline shell
       run: >-
         echo "Running in $(pwd)" &&
         true
-      shell: C:\cygwin\bin\bash.exe '{0}'
+      shell: D:\cygwin\bin\bash.exe '{0}'
 
     - name: Shell script
-      run: C:\cygwin\bin\bash.exe tests/script.sh
+      run: D:\cygwin\bin\bash.exe tests/script.sh
 
     - name: Check requested packages got installed
-      run: C:\cygwin\bin\sponge.exe tmp
+      run: D:\cygwin\bin\sponge.exe tmp
       if: contains(matrix.packages, 'moreutils')
 
     - name: Check PATH hasn't changed
@@ -119,6 +122,7 @@ jobs:
         include:
           - install-dir: C:\tools\cygwin
           - install-dir: D:\cygwin64
+      fail-fast: false
 
     steps:
     - run: git config --global core.autocrlf input
@@ -149,6 +153,45 @@ jobs:
       env:
         SHELLOPTS: igncr
 
+  work-vol-test:
+    runs-on: windows-latest
+    name: 'Check work volume behaviour'
+
+    strategy:
+      matrix:
+        include:
+          - work-vol: 'C:'
+          - work-vol: 'D:'
+      fail-fast: false
+
+    steps:
+    - run: git config --global core.autocrlf input
+
+    - uses: actions/checkout@v4
+
+    - name: Install Cygwin
+      uses: ./
+      with:
+        work-vol: "${{ matrix.work-vol }}"
+
+    - name: Check directory use
+      run: |
+        root_dir=$(cygpath -aw /)
+        echo "Installed in ${root_dir}"
+        if [[ "${root_dir}" != "${{ matrix.work-vol }}\cygwin" ]]; then
+          exit 1
+        fi
+
+        setup_file=$(cygpath -au ${{ matrix.work-vol }}\setup.exe)
+        echo "Setup should be stored at ${setup_file}"
+        if [[ ! -f ${setup_file} ]]; then
+          exit 1
+        fi
+
+      shell: bash
+      env:
+        SHELLOPTS: igncr
+
   symlink-test:
     runs-on: windows-latest
     name: 'Check symlink type control'
@@ -159,6 +202,7 @@ jobs:
           - symlink-type: native
           - symlink-type: sys
           - symlink-type: wsl
+      fail-fast: false
 
     env:
       CYGWIN: winsymlinks:${{ matrix.symlink-type }}
