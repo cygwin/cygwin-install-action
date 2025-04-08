@@ -68,33 +68,44 @@ runs:
         $setupExe = "$vol\setup.exe"
         $setupFileName = "setup-$platform.exe"
 
-        $maxRetries = 5
-        $retryCount = 0
-        $success = $false
-        $delay = 2
+        function Invoke-WebRequest-With-Retry {
+          param (
+            $Uri,
+            $OutFile
+          )
 
-        while (-not $success -and $retryCount -lt $maxRetries) {
-          try {
-            Invoke-WebRequest -Uri "https://cygwin.com/$setupFileName" -OutFile $setupExe
-            $success = $true
-          } catch {
-            Write-Output "Attempt $($retryCount + 1) failed. Retrying..."
-            Start-Sleep -Seconds $delay
-            $retryCount++
-            $delay += $delay
+          $maxRetries = 5
+          $retryCount = 0
+          $success = $false
+          $delay = 2
+
+          while (-not $success -and $retryCount -lt $maxRetries) {
+            try {
+              Invoke-WebRequest -Uri $Uri -OutFile $OutFile
+              $success = $true
+            } catch [System.Net.WebException] {
+              Write-Output "Attempt $($retryCount + 1) failed. Retrying..."
+              Start-Sleep -Seconds $delay
+              $retryCount++
+              $delay += $delay
+            }
+          }
+
+          if (-not $success) {
+            throw "Failed to download $setupFileName after $maxRetries attempts."
           }
         }
 
-        if (-not $success) {
-          throw "Failed to download $setupFileName after $maxRetries attempts."
-        }
+        Invoke-WebRequest-With-Retry "https://cygwin.com/$setupFileName" $setupExe
 
         if ((Get-Item -LiteralPath $setupExe).Length -eq 0) {
           throw "The downloaded setup has a zero length!"
         }
 
         if ('${{ inputs.check-hash }}' -eq 'true') {
-          $expectedHashLines = $(Invoke-WebRequest -Uri https://cygwin.com/sha512.sum).ToString() -split "`n"
+          $hashFile = "$vol\sha512.sum"
+          Invoke-WebRequest-With-Retry https://cygwin.com/sha512.sum $hashFile
+          $expectedHashLines = Get-Content $hashFile
           $expectedHash = ''
           foreach ($expectedHashLine in $expectedHashLines) {
             if ($expectedHashLine.EndsWith(" $setupFileName")) {
