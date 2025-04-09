@@ -301,3 +301,43 @@ jobs:
 
     - name: Run test shell script
       run: C:\cygwin\bin\bash.exe /cygwin-install-action-test.sh
+
+  outputs-test:
+    runs-on: windows-latest
+
+    name: 'Test outputs'
+
+    steps:
+    - run: git config --global core.autocrlf input
+
+    - uses: actions/checkout@v4
+
+    - name: Install Cygwin
+      id: cygwin-install
+      uses: ./
+
+    - name: Verify Outputs
+      run: |
+        echo "setup executable is at: ${SETUP}"
+        echo "cygwin install root directory is: ${ROOT}"
+        echo "cygwin package cache directory is: ${CACHE}"
+
+        if [[ "${SETUP}" != "D:\setup.exe" ]]; then
+          echo "unexpected value for 'setup' output"
+          exit 1
+        fi
+
+        if [[ "${ROOT}" != "D:\cygwin" ]]; then
+          echo "unexpected value for 'root' output"
+          exit 1
+        fi
+
+        if [[ "${CACHE}" != "D:\cygwin-packages" ]]; then
+          echo "unexpected value for 'package-cache' output"
+          exit 1
+        fi
+      shell: bash -o igncr '{0}'
+      env:
+        SETUP: ${{ steps.cygwin-install.outputs.setup }}
+        ROOT: ${{ steps.cygwin-install.outputs.root }}
+        CACHE: ${{ steps.cygwin-install.outputs.package-cache }}

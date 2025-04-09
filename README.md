@@ -108,6 +108,18 @@ These options are very unlikely to be useful except in some very isolated
 circumstances, such as using the [Cygwin Time
 Machine](http://www.crouchingtigerhiddenfruitbat.org/Cygwin/timemachine.html).
 
+Outputs
+-------
+
+| Output        | Description
+| ------------- | -----------------------------------------
+| package-cache | Package cache directory
+| root          | Root directory of the Cygwin installation (equal to the install-dir input)
+| setup         | Cygwin setup executable pathname
+
+Footnotes
+---------
+
 [1] The
 [Workflow documentation](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#exit-codes-and-error-action-preference)
 suggests you should also use bash options `-eo pipefail`, omitted here for clarity

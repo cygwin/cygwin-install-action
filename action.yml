@@ -46,10 +46,22 @@ inputs:
     required: false
     default: ''
 
+outputs:
+  setup:
+    description: Pathname of the Cygwin setup executable
+    value: ${{ steps.cygwin-install-action.outputs.setup }}
+  root:
+    description: Root directory of Cygwin installation (equal to install-dir input)
+    value: ${{ steps.cygwin-install-action.outputs.root }}
+  package-cache:
+    description: Package cache directory
+    value: ${{ steps.cygwin-install-action.outputs.package-cache }}
+
 runs:
   using: "composite"
   steps:
-    - run: |
+    - id: cygwin-install-action
+      run: |
         $ErrorActionPreference = 'Stop'
         $platform = '${{ inputs.platform }}'
         $platform = $platform -replace '^(x64|amd64)$', 'x86_64'
@@ -143,6 +155,8 @@ runs:
           $installDir = '${{ inputs.install-dir }}'
         }
 
+        $packageDir = "$vol\cygwin-packages"
+
         $packages = '${{ inputs.packages }}'
         $pkg_list = $packages.Split('', [System.StringSplitOptions]::RemoveEmptyEntries)
         $pkg_list = $pkg_list | % { $_.Trim() }
@@ -150,7 +164,7 @@ runs:
 
         $args = @(
          '-qnO',
-         '-l', "$vol\cygwin-packages",
+         '-l', "$packageDir",
          '-R', "$installDir"
         )
 
@@ -212,6 +226,12 @@ runs:
 
         # run login shell to copy skeleton profile files
         & "$installDir\bin\bash.exe" --login
+
+        # set outputs
+        echo "setup=$setupExe" >> $env:GITHUB_OUTPUT
+        echo "root=$installDir" >> $env:GITHUB_OUTPUT
+        echo "package-cache=$packageDir" >> $env:GITHUB_OUTPUT
+
       shell: powershell
 
 branding:
