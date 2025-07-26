@@ -20,7 +20,7 @@ Parameters
 
 | Input               | Default                                      | Description
 | ------------------- | -------------------------------------------- | -----------
-| platform            | x86_64                                       | Install the x86 or x86\_64 version of Cygwin.
+| platform            | x86_64                                       | Install the x86\_64 or x86 [2] version of Cygwin.
 | packages            | *none*                                       | List of additional packages to install.
 | install-dir         | D:\cygwin                                    | Installation directory (overrides work-vol)
 | site                | http://mirrors.kernel.org/sourceware/cygwin/ | Mirror sites to install from, separated by whitespace
@@ -67,6 +67,11 @@ PATH
 
 By default, this action prepends Cygwin's /usr/bin directory to the PATH.
 
+If you want the opposite – the system PATH to remain unchanged by this action –
+add `add-to-path: false` to the action settings.
+
+### A clean PATH
+
 However, if you want to ensure that PATH only contains Cygwin executables,
 and other stuff installed in the VM image isn't going to get picked up:
 
@@ -81,8 +86,6 @@ or,
   * `cd ${GITHUB_WORKSPACE}` in your shell script, or
   * prevent the profile script from changing directory by putting
     `CHERE_INVOKING` into the environment
-
-If you want the opposite – the system PATH to remain unchanged by this action – add `add-to-path: false` to the action settings.
 
 Symlinks
 --------
@@ -123,3 +126,6 @@ Footnotes
 [1] The
 [Workflow documentation](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#exit-codes-and-error-action-preference)
 suggests you should also use bash options `-eo pipefail`, omitted here for clarity
+
+[2] `platform: x86` automatically sets `site` to select the final, 2022-11-23
+archive of x86 Cygwin.
