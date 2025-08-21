@@ -235,7 +235,11 @@ runs:
         if ('${{ inputs.login-shell }}' -eq $true) {
           $loginshell = "l"
         }
-        Set-Content -Path (Join-Path $wrapperDir "cygwin.cmd") -Value "@echo off`r`nset CHERE_INVOKING=1`r`n$installDir\\bin\\bash.exe --noprofile --norc -o igncr -${loginshell}eo pipefail %*"
+        Set-Content -Path (Join-Path $wrapperDir "cygwin.cmd") -Value @"
+        @echo off`r
+        set CHERE_INVOKING=1`r
+        $installDir\\bin\\bash.exe --noprofile --norc -o igncr -${loginshell}eo pipefail %*
+        "@
         echo "$wrapperDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
         # run login shell to copy skeleton profile files
