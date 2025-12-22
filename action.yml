@@ -45,6 +45,10 @@ inputs:
     description: Volume on which to store setup and packages, and install Cygwin
     required: false
     default: ''
+  login-shell:
+    description: Use a login shell when using wrapper script
+    required: false
+    default: 'true'
 
 outputs:
   setup:
@@ -223,6 +227,20 @@ runs:
         if ('${{ inputs.add-to-path }}' -eq 'true') {
           echo "$installDir\bin" >> $env:GITHUB_PATH
         }
+
+        # add a wrapper script to put on path, since a run step's shell doesn't accept output variable substitutions
+        $wrapperDir = Join-Path $env:RUNNER_TEMP ([IO.Path]::GetRandomFileName())
+        New-Item -Path $wrapperDir -ItemType Directory -Force | Out-Null
+        $loginshell = ""
+        if ('${{ inputs.login-shell }}' -eq $true) {
+          $loginshell = "l"
+        }
+        Set-Content -Path (Join-Path $wrapperDir "cygwin.cmd") -Value @"
+        @echo off`r
+        set CHERE_INVOKING=1`r
+        $installDir\\bin\\bash.exe -o igncr -${loginshell}eo pipefail %*
+        "@
+        echo "$wrapperDir" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
         # run login shell to copy skeleton profile files
         & "$installDir\bin\bash.exe" --login
