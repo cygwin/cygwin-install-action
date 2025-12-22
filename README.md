@@ -11,16 +11,21 @@ e.g.
 
     - uses: cygwin/cygwin-install-action@master
 
-    - run: bash tests/script.sh  # see footnote [1]
+    - run: bash tests/script.sh  # see note below
 
-Please fix my terrible cargo-cult PowerShell.
+> [!NOTE]
+> 
+> The
+> [Workflow documentation](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#exit-codes-and-error-action-preference)
+> suggests you should also use bash options `-eo pipefail`. It's omitted here for clarity.
+
 
 Parameters
 ----------
 
 | Input               | Default                                      | Description
 | ------------------- | -------------------------------------------- | -----------
-| platform            | x86_64                                       | Install the x86\_64 or x86 [2] version of Cygwin.
+| platform            | x86_64                                       | Install the x86\_64 or x86 [^1] version of Cygwin.
 | packages            | *none*                                       | List of additional packages to install.
 | install-dir         | D:\cygwin                                    | Installation directory (overrides work-vol)
 | site                | http://mirrors.kernel.org/sourceware/cygwin/ | Mirror sites to install from, separated by whitespace
@@ -123,9 +128,5 @@ Outputs
 Footnotes
 ---------
 
-[1] The
-[Workflow documentation](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#exit-codes-and-error-action-preference)
-suggests you should also use bash options `-eo pipefail`, omitted here for clarity
-
-[2] `platform: x86` automatically sets `site` to select the final, 2022-11-23
+[^1]: `platform: x86` automatically sets `site` to select the final, 2022-11-23
 archive of x86 Cygwin.
