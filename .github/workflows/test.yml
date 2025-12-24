@@ -341,3 +341,13 @@ jobs:
         SETUP: ${{ steps.cygwin-install.outputs.setup }}
         ROOT: ${{ steps.cygwin-install.outputs.root }}
         CACHE: ${{ steps.cygwin-install.outputs.package-cache }}
+
+  pester:
+    name: "Pester test suite"
+    runs-on: "windows-latest"
+    steps:
+      - name: "Checkout the repository"
+        uses: "actions/checkout@v6"
+      - name: "Run Pester"
+        run: |
+          Invoke-Pester -Output Detailed ./tests
