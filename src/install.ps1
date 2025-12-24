@@ -1,11 +1,9 @@
 $ErrorActionPreference = 'Stop'
-$platform = "$env:inputs_platform"
-$platform = $platform -replace '^(x64|amd64)$', 'x86_64'
-$platform = $platform -replace '^i686$', 'x86'
-# validate that platform is one of the expected values
-if (($platform -ne 'x86') -and ($platform -ne 'x86_64')) {
-    throw "Unknown platform $platform."
-}
+
+# Import functions.
+. "$PSScriptRoot/_functions.ps1"
+
+$platform = Get-Validated-Platform -Platform "$env:inputs_platform"
 
 $vol = "$env:inputs_work_vol"
 # If temporary drive D: doesn't exist in the VM, fallback to C:
