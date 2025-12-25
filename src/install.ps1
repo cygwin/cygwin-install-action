@@ -144,9 +144,7 @@ if ($platform -eq 'x86') {
     $args += '--allow-unsupported-windows'
 }
 
-# because setup is a Windows GUI app, make it part of a pipeline to make
-# PowerShell wait for it to exit
-& $setupExe $args | Out-Default
+Invoke-Cygwin-Setup -SetupExePath $setupExe -SetupExeArgs $args
 
 if ("$env:inputs_work_vol" -eq '' -and "$env:inputs_install_dir" -eq '') {
     # Create a symlink for compatibility with previous versions of this
