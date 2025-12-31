@@ -4,16 +4,7 @@ $ErrorActionPreference = 'Stop'
 . "$PSScriptRoot/_functions.ps1"
 
 $platform = Get-Validated-Platform -Platform "$env:inputs_platform"
-
-$vol = "$env:inputs_work_vol"
-# If temporary drive D: doesn't exist in the VM, fallback to C:
-if ("$vol" -eq '') {
-    if (Test-Path -LiteralPath 'D:\') {
-        $vol = 'D:'
-        } else {
-        $vol = 'C:'
-        }
-}
+$vol = Get-Validated-Work-Volume -WorkVolume "$env:inputs_work_vol"
 
 $setupExe = "$vol\setup.exe"
 $setupFileName = "setup-$platform.exe"
