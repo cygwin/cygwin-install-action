@@ -22,6 +22,23 @@ function Get-Validated-Platform {
 }
 
 
+function Get-Validated-Sites {
+    param (
+        $Platform,
+        $Sites
+    )
+
+    if ("$Sites" -eq '') {
+        if ("$Platform" -eq 'x86') {
+            return @( 'https://mirrors.kernel.org/sourceware/cygwin-archive/20221123' )
+        }
+        return @( 'https://mirrors.kernel.org/sourceware/cygwin/' )
+    }
+
+    return "$Sites" -Split '\s+' | Where { $_ }
+}
+
+
 function Invoke-Cygwin-Setup {
     param (
         $SetupExePath,
