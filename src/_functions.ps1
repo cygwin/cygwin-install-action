@@ -38,3 +38,34 @@ function Invoke-Cygwin-Setup {
         throw "$SetupExePath exited with error code $LASTEXITCODE"
     }
 }
+
+
+function Get-Validated-Work-Volume {
+    param (
+        $WorkVolume
+    )
+
+    # Prefer the user's chosen volume.
+    if ("$WorkVolume" -ne '') {
+        if ("$WorkVolume" -notmatch '^[A-Za-z]:$') {
+            throw "The work volume, '$WorkVolume', must be only a drive letter and a colon, like 'D:'."
+        }
+        if (-Not (Test-Path -LiteralPath "$WorkVolume\")) {
+            throw "The work volume, '$WorkVolume', is not a valid drive."
+        }
+        return "$WorkVolume".ToUpper()
+    }
+
+    # Prefer the 'D:' drive but fall back to SYSTEMDRIVE.
+    if (Test-Path -LiteralPath 'D:\') {
+        return 'D:'
+    }
+
+    return Get-SystemDrive
+}
+
+
+# ---------------------------------------------------------------------
+# Functions below this line exist so the test suite can mock them.
+
+function Get-SystemDrive { "$Env:SYSTEMDRIVE" }
