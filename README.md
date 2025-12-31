@@ -23,19 +23,19 @@ e.g.
 Parameters
 ----------
 
-| Input               | Default                                      | Description
-| ------------------- | -------------------------------------------- | -----------
-| platform            | x86_64                                       | Install the x86\_64 or x86 [^1] version of Cygwin.
-| packages            | *none*                                       | List of additional packages to install.
-| install-dir         | D:\cygwin                                    | Installation directory (overrides work-vol)
-| site                | http://mirrors.kernel.org/sourceware/cygwin/ | Mirror sites to install from, separated by whitespace
-| pubkeys             | *none*                                       | Absolute paths of extra public key files (RFC4880 format), separated by whitespace
-| check-sig           | true                                         | Whether to check the setup.ini signature
-| add-to-path         | true                                         | Whether to add Cygwin's `/bin` directory to the system `PATH`
-| allow-test-packages | false                                        | Consider package versions marked test for installation
-| check-hash          | true                                         | Whether to check the hash of the downloaded Cygwin installer.
-| check-installer-sig | true                                         | Whether to check the Authenticode signature of the downloaded Cygwin installer.
-| work-vol            | D:                                           | Volume on which to store setup and packages, and install Cygwin.
+| Input               | Default                                         | Description
+| ------------------- |-------------------------------------------------| -----------
+| platform            | x86_64                                          | Install the x86\_64 or x86 [^1] version of Cygwin.
+| packages            | *none*                                          | List of additional packages to install.
+| install-dir         | D:\cygwin                                       | Installation directory (overrides work-vol)
+| site                | `https://mirrors.kernel.org/sourceware/cygwin/` | Mirror sites to install from, separated by whitespace
+| pubkeys             | *none*                                          | Absolute paths of extra public key files (RFC4880 format), separated by whitespace
+| check-sig           | true                                            | Whether to check the setup.ini signature
+| add-to-path         | true                                            | Whether to add Cygwin's `/bin` directory to the system `PATH`
+| allow-test-packages | false                                           | Consider package versions marked test for installation
+| check-hash          | true                                            | Whether to check the hash of the downloaded Cygwin installer.
+| check-installer-sig | true                                            | Whether to check the Authenticode signature of the downloaded Cygwin installer.
+| work-vol            | D:                                              | Volume on which to store setup and packages, and install Cygwin.
 
 Line endings
 ------------
