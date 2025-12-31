@@ -106,16 +106,7 @@ if ( "$env:inputs_allow_test_packages" -eq 'true' ) {
     $args += '-t' # --allow-test-packages
 }
 
-# default site if not specified
-if ( "$env:inputs_site" ) {
-    $sites = "$env:inputs_site"
-} elseif ($platform -eq 'x86') {
-    $sites = 'http://mirrors.kernel.org/sourceware/cygwin-archive/20221123'
-} else {
-    $sites = 'http://mirrors.kernel.org/sourceware/cygwin/'
-}
-$site_list = $sites.Split('', [System.StringSplitOptions]::RemoveEmptyEntries)
-$site_list = $site_list | % { $_.Trim() }
+$site_list = Get-Validated-Sites -Platform "$platform" -Sites "$env:inputs_site"
 foreach ($site in $site_list) {
     $args += '-s'
     $args += $site
