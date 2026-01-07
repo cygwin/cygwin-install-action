@@ -32,6 +32,7 @@ Table of Contents
 * [Inputs](#inputs)
 
   * [`packages`](#packages)
+  * [`error-on-missing-packages`](#error-on-missing-packages)
   * [`allow-test-packages`](#allow-test-packages)
   * [`work-vol`](#work-vol)
   * [`install-dir`](#install-dir)
@@ -71,6 +72,26 @@ Example usage:
       git
       python3
       python3-pip
+```
+
+### `error-on-missing-packages`
+
+By default, if any packages in the [`packages`](#packages) input
+cannot be found, the action will fail.
+
+Errors can be downgraded to warnings by setting this input to `'false'`.
+This may be useful when Cygwin transitions from one package to another
+for equivalent functionality.
+
+Example usage:
+
+```yaml
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    packages: |
+      package10
+      alternate-package10
+    error-on-missing-packages: 'false'
 ```
 
 ### `allow-test-packages`

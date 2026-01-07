@@ -5,6 +5,7 @@ $ErrorActionPreference = 'Stop'
 
 $platform = Get-Validated-Platform -Platform "$env:inputs_platform"
 $vol = Get-Validated-Work-Volume -WorkVolume "$env:inputs_work_vol"
+$error_on_missing_packages = Get-Validated-Error-On-Missing-Packages -Value "$env:inputs_error_on_missing_packages"
 
 $setupExe = "$vol\setup.exe"
 $setupFileName = "setup-$platform.exe"
@@ -126,7 +127,7 @@ if ($platform -eq 'x86') {
     $args += '--allow-unsupported-windows'
 }
 
-Invoke-Cygwin-Setup -SetupExePath $setupExe -SetupExeArgs $args
+Invoke-Cygwin-Setup -SetupExePath $setupExe -SetupExeArgs $args -ErrorOnMissingPackages $error_on_missing_packages
 
 if ("$env:inputs_work_vol" -eq '' -and "$env:inputs_install_dir" -eq '') {
     # Create a symlink for compatibility with previous versions of this
