@@ -20,7 +20,7 @@ Describe 'Get-Validated-Sites' {
         }
 
         It 'Spaces' {
-            Get-Validated-Sites -Sites ' a b ' | Should -Be @( 'a', 'b' )
+            Get-Validated-Sites -Sites ' a  b   c ' | Should -Be @( 'a', 'b', 'c' )
         }
 
         It 'Newlines and tabs' {
