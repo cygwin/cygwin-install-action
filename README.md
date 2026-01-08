@@ -5,37 +5,268 @@ This GitHub Action can be used in a workflow to install Cygwin.
 
 e.g.
 
-    - run: git config --global core.autocrlf input
+```yaml
+- run: git config --global core.autocrlf input
+- uses: actions/checkout@v6
 
-    - uses: actions/checkout@v6
+- uses: cygwin/cygwin-install-action@v6
+  with:
+    packages: |
+      git
+      python3
+      python3-pip
 
-    - uses: cygwin/cygwin-install-action@master
-
-    - run: bash tests/script.sh  # see note below
+- run: bash tests/script.sh  # see note below
+```
 
 > [!NOTE]
-> 
-> The
-> [Workflow documentation](https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#exit-codes-and-error-action-preference)
-> suggests you should also use bash options `-eo pipefail`. It's omitted here for clarity.
+>
+> The [Workflow documentation][github-workflow-documentation]
+> suggests you should also use bash options `-eo pipefail`.
+> It's omitted here for clarity.
 
 
-Parameters
-----------
+Table of Contents
+-----------------
 
-| Input               | Default                                         | Description
-| ------------------- |-------------------------------------------------| -----------
-| platform            | x86_64                                          | Install the x86\_64 or x86 [^1] version of Cygwin.
-| packages            | *none*                                          | List of additional packages to install.
-| install-dir         | D:\cygwin                                       | Installation directory (overrides work-vol)
-| site                | `https://mirrors.kernel.org/sourceware/cygwin/` | Mirror sites to install from, separated by whitespace
-| pubkeys             | *none*                                          | Absolute paths of extra public key files (RFC4880 format), separated by whitespace
-| check-sig           | true                                            | Whether to check the setup.ini signature
-| add-to-path         | true                                            | Whether to add Cygwin's `/bin` directory to the system `PATH`
-| allow-test-packages | false                                           | Consider package versions marked test for installation
-| check-hash          | true                                            | Whether to check the hash of the downloaded Cygwin installer.
-| check-installer-sig | true                                            | Whether to check the Authenticode signature of the downloaded Cygwin installer.
-| work-vol            | D:                                              | Volume on which to store setup and packages, and install Cygwin.
+* [Inputs](#inputs)
+
+  * [`packages`](#packages)
+  * [`allow-test-packages`](#allow-test-packages)
+  * [`work-vol`](#work-vol)
+  * [`install-dir`](#install-dir)
+  * [`platform`](#platform)
+  * [`add-to-path`](#add-to-path)
+  * [`site`](#site)
+  * [`pubkeys`](#pubkeys)
+  * [`check-hash`](#check-hash)
+  * [`check-installer-sig`](#check-installer-sig)
+  * [`check-sig`](#check-sig)
+
+* [Outputs](#outputs)
+
+  * [`root`](#root)
+  * [`setup`](#setup)
+  * [`package-cache`](#package-cache)
+
+* [Line endings](#line-endings)
+* [PATH](#path)
+* [Symlinks](#symlinks)
+* [Mirrors and signatures](#mirrors-and-signatures)
+
+
+Inputs
+------
+
+### `packages`
+
+A list of additional packages to install.
+
+Example usage:
+
+```yaml
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    packages: |
+      git
+      python3
+      python3-pip
+```
+
+### `allow-test-packages`
+
+By default, packages marked test are not considered for installation.
+
+Setting this input to `'true'` will allow test packages
+to be found and installed.
+
+```yaml
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    allow-test-packages: 'true'
+    packages: |
+      my-cool-package
+```
+
+### `work-vol`
+
+The Windows volume to which `setup.exe` and packages are downloaded
+during installation.
+
+By default, `work-vol` is also the volume where Cygwin will be installed,
+but the install location can be customized using the
+[`install-dir`](#install-dir) input.
+
+The default value is `'D:'` for performance reasons.
+
+Example:
+
+```yaml
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    work-vol: 'C:' # This affects the Cygwin install directory, too.
+```
+
+### `install-dir`
+
+The absolute path to the directory where Cygwin will be installed.
+
+The default install directory is `'D:\cygwin'`,
+which is calculated using the [`work-vol`](#work-vol) input.
+
+Example:
+
+```yaml
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    install-dir: 'D:\cygwin64'
+```
+
+### `platform`
+
+Customize whether to install the 64-bit or 32-bit version of Cygwin.
+
+The only supported value is `'x86_64'`.
+
+If `platform: 'x86'` is set, the [`site`](#site) input will be overridden
+to select the final 2022-11-23 archive of x86 Cygwin.
+
+Valid values are `'x86_64'` (the default) or `'x86'`.
+
+Example usage:
+
+```yaml
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    platform: 'x86_64'
+```
+
+### `add-to-path`
+
+By default, Cygwin's `/usr/bin` directory is added to the system `$PATH`.
+
+This behavior can be disabled by setting this input to `'false'`.
+
+```yaml
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    add-to-path: 'false'
+```
+
+### `site`
+
+Mirror sites to install from, separated by whitespace.
+
+Default: `https://mirrors.kernel.org/sourceware/cygwin/`
+
+Example:
+
+```yaml
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    site: |
+      https://mirrors.kernel.org/sourceware/cygwin/
+      https://domain.example/path/
+```
+
+### `pubkeys`
+
+Absolute paths to extra public key files (RFC4880 format).
+
+Example:
+
+```yaml
+# Prior to reaching this step in the workflow
+# you would need to download the keys referenced below.
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    pubkeys: |
+      D:\key1.pub
+      D:\key2.pub
+```
+
+### `check-hash`
+
+By default, the hash of the Cygwin installer will be verified.
+
+This behavior can be disabled by setting this input to `'false'`.
+
+> [!WARNING]
+>
+> Disabling hash verification may create a security risk.
+>
+> Only disable this if you are very confident
+> that this is appropriate and necessary.
+
+Example:
+
+```yaml
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    check-hash: 'true'  # Change to 'false' only if required.
+```
+
+### `check-installer-sig`
+
+By default, the Authenticode signature of the `setup.exe` file will be verified.
+
+This behavior can be disabled by setting this input to `'false'`.
+
+> [!WARNING]
+>
+> Disabling signature verification may create a security risk.
+>
+> Only disable this if you are very confident
+> that this is appropriate and necessary.
+
+Example:
+
+```yaml
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    check-installer-sig: 'true'  # Change to 'false' only if required.
+```
+
+### `check-sig`
+
+By default, the signature of the `setup.ini` file will be verified.
+
+This behavior can be disabled by setting this input to `'false'`.
+
+> [!WARNING]
+>
+> Disabling signature verification may create a security risk.
+>
+> Only disable this if you are very confident
+> that this is appropriate and necessary.
+
+Example:
+
+```yaml
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    check-sig: 'true'  # Change to 'false' only if required.
+```
+
+
+Outputs
+-------
+
+### `root`
+
+The root directory of the Cygwin installation.
+
+By default, this value will be `'D:\cygwin'`, but it is affected by the
+[`work-vol`](#work-vol) and [`install-dir`](#install-dir) options.
+
+### `setup`
+
+The absolute path to the Cygwin `setup.exe` installer.
+
+### `package-cache`
+
+The absolute path to the package cache directory.
+
 
 Line endings
 ------------
@@ -67,13 +298,14 @@ have the same effect, but this can have unintended side-effects (by default,
 `SHELLOPTS` is a shell variable and moving it to the environment causes **all**
 shell options to propagate to child shells).
 
+
 PATH
 ----
 
-By default, this action prepends Cygwin's /usr/bin directory to the PATH.
+By default, this action prepends Cygwin's `/usr/bin` directory to the PATH.
 
-If you want the opposite – the system PATH to remain unchanged by this action –
-add `add-to-path: false` to the action settings.
+If you do not want the system PATH changed,
+set [`add-to-path`](#add-to-path) to `'false'`.
 
 ### A clean PATH
 
@@ -92,6 +324,7 @@ or,
   * prevent the profile script from changing directory by putting
     `CHERE_INVOKING` into the environment
 
+
 Symlinks
 --------
 
@@ -105,28 +338,18 @@ those executables directly in a `run:` in your workflow. Execute them via
 Alternatively, putting e.g. `CYGWIN=winsymlinks:native` into the workflow's
 environment works, since setup now honours that.
 
+
 Mirrors and signatures
 ----------------------
 
-You probably don't need to change the setting for `site`, and you shouldn't
-change `check-installer-sig` or `check-sig` unless you're very confident it's
-appropriate and necessary.
+You probably don't need to change the setting for [`site`](#site),
+and you shouldn't change [`check-hash`](#check-hash),
+[`check-installer-sig`](#check-installer-sig), or [`check-sig`](#check-sig)
+unless you're very confident it's appropriate and necessary.
 
 These options are very unlikely to be useful except in some very isolated
-circumstances, such as using the [Cygwin Time
-Machine](http://www.crouchingtigerhiddenfruitbat.org/Cygwin/timemachine.html).
+circumstances, such as using the [Cygwin Time Machine][cygwin-time-machine].
 
-Outputs
--------
 
-| Output        | Description
-| ------------- | -----------------------------------------
-| package-cache | Package cache directory
-| root          | Root directory of the Cygwin installation (equal to the install-dir input)
-| setup         | Cygwin setup executable pathname
-
-Footnotes
----------
-
-[^1]: `platform: x86` automatically sets `site` to select the final, 2022-11-23
-archive of x86 Cygwin.
+[github-workflow-documentation]: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#exit-codes-and-error-action-preference
+[cygwin-time-machine]: http://www.crouchingtigerhiddenfruitbat.org/Cygwin/timemachine.html
