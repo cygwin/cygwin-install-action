@@ -124,14 +124,19 @@ Example:
 
 ### `platform`
 
-Customize whether to install the 64-bit or 32-bit version of Cygwin.
+Select the architecture to install.
 
-The only supported value is `'x86_64'`.
+`'x86_64'` is the default value, but `'x86'` can also be specified.
 
-If `platform: 'x86'` is set, the [`site`](#site) input will be overridden
-to select the final 2022-11-23 archive of x86 Cygwin.
-
-Valid values are `'x86_64'` (the default) or `'x86'`.
+> [!NOTE]
+>
+> Cygwin no longer supports the `'x86'` architecture.
+>
+> If `platform: 'x86'` is set, the [`site`](#site) input will change defaults
+> to select the final 2022-11-23 archive of `'x86'` Cygwin.
+>
+> Please refer to the Cygwin Installation documentation regarding
+> [how to install Cygwin on an unsupported Windows version][unsupported].
 
 Example usage:
 
@@ -157,7 +162,12 @@ This behavior can be disabled by setting this input to `'false'`.
 
 Mirror sites to install from, separated by whitespace.
 
-Default: `https://mirrors.kernel.org/sourceware/cygwin/`
+The default site is selected based on the value of the [`platform`](#platform):
+
+| `platform` | `site` default                                                  |
+|------------|-----------------------------------------------------------------|
+| `'x86_64'` | `https://mirrors.kernel.org/sourceware/cygwin/`                 |
+| `'x86'`    | `https://mirrors.kernel.org/sourceware/cygwin-archive/20221123` |
 
 Example:
 
@@ -229,7 +239,7 @@ Example:
 
 ### `check-sig`
 
-By default, the signature of the `setup.ini` file will be verified.
+By default, the signature of the package manifest signature will be verified.
 
 This behavior can be disabled by setting this input to `'false'`.
 
@@ -353,3 +363,4 @@ circumstances, such as using the [Cygwin Time Machine][cygwin-time-machine].
 
 [github-workflow-documentation]: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#exit-codes-and-error-action-preference
 [cygwin-time-machine]: http://www.crouchingtigerhiddenfruitbat.org/Cygwin/timemachine.html
+[unsupported]: https://cygwin.com/install.html#unsupported
