@@ -220,9 +220,6 @@ jobs:
 
   time-machine:
     runs-on: windows-latest
-    strategy:
-      fail-fast: false
-
     name: 'Test time machine signature'
 
     steps:
@@ -243,9 +240,6 @@ jobs:
 
   bad-sig:
     runs-on: windows-latest
-    strategy:
-      fail-fast: false
-
     name: 'Test failure of time machine signature'
 
     steps:
@@ -275,9 +269,6 @@ jobs:
 
   multiple-sites-and-pubkeys:
     runs-on: windows-latest
-    strategy:
-      fail-fast: false
-
     name: 'Test multiple sites and extra pubkeys'
 
     steps:
