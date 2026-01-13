@@ -238,7 +238,7 @@ Example:
 
 ### `check-sig`
 
-By default, the signature of the package manifest signature will be verified.
+By default, the signature of the package manifest will be verified.
 
 This behavior can be disabled by setting this input to `'false'`.
 
