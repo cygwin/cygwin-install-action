@@ -90,8 +90,7 @@ to be found and installed.
 
 ### `work-vol`
 
-The Windows volume to which `setup.exe` and packages are downloaded
-during installation.
+The Windows volume to which the installer and packages are downloaded.
 
 By default, `work-vol` is also the volume where Cygwin will be installed,
 but the install location can be customized using the
@@ -218,7 +217,7 @@ Example:
 
 ### `check-installer-sig`
 
-By default, the Authenticode signature of the `setup.exe` file will be verified.
+By default, the Authenticode signature of the installer file will be verified.
 
 This behavior can be disabled by setting this input to `'false'`.
 
@@ -271,7 +270,7 @@ By default, this value will be `'D:\cygwin'`, but it is affected by the
 
 ### `setup`
 
-The absolute path to the Cygwin `setup.exe` installer.
+The absolute path to the Cygwin installer.
 
 ### `package-cache`
 
@@ -338,7 +337,7 @@ or,
 Symlinks
 --------
 
-Cygwin's `setup` creates Cygwin-style symlinks by default, and some
+Cygwin's installer creates Cygwin-style symlinks by default, and some
 executables (e.g. `python`) are symlinks.
 
 Since CMD and PowerShell don't understand those symlinks, you cannot run
@@ -346,7 +345,7 @@ those executables directly in a `run:` in your workflow. Execute them via
 `bash` or `env` instead.
 
 Alternatively, putting e.g. `CYGWIN=winsymlinks:native` into the workflow's
-environment works, since setup now honours that.
+environment works, since the installer now honours that.
 
 
 Mirrors and signatures
