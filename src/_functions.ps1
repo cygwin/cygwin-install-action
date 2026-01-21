@@ -40,20 +40,61 @@ function Get-Validated-Sites {
 }
 
 
+function Get-Validated-Error-On-Missing-Packages {
+    param (
+        $Value
+    )
+
+    switch ($Value.ToLower()) {
+        'false' { return 'false' }
+        default { return 'true'  }
+    }
+}
+
+
 function Invoke-Cygwin-Setup {
     param (
         $SetupExePath,
-        $SetupExeArgs
+        $SetupExeArgs,
+        $ErrorOnMissingPackages
     )
 
     # Because setup is a Windows GUI app, make it part of a pipeline
     # to make PowerShell wait for it to exit.
     Write-Host $SetupExePath $SetupExeArgs
-    & $SetupExePath $SetupExeArgs | Out-Default
+    & $SetupExePath $SetupExeArgs | Tee-Object -Variable setupOutput | Out-Default
 
     # Check the exit code.
     if ($LASTEXITCODE -ne 0) {
         throw "$SetupExePath exited with error code $LASTEXITCODE"
+    }
+
+    # Check the output for missing packages.
+    $packagesNotFound=($setupOutput | Select-String -Pattern "^Package .+ not found.*$").Matches.Value
+    if ($packagesNotFound) {
+        $message="One or more packages could not be found"
+        if ($ErrorOnMissingPackages -eq 'false') {
+            Write-GitHub-Message -Message $message -Level "warning"
+            Write-Output ($packagesNotFound -Join "`n")
+        } else {
+            Write-GitHub-Message -Message $message -Level "error"
+            Write-Output ($packagesNotFound -Join "`n")
+            throw "$message"
+        }
+    }
+}
+
+
+function Write-GitHub-Message {
+    param (
+        $Message,
+        $Level
+    )
+
+    if ("$Level" -eq "warning") {
+        Write-Output "::warning::$Message"
+    } else {
+        Write-Output "::error::$Message"
     }
 }
 
