@@ -132,10 +132,11 @@ Select the architecture to install.
 > Cygwin no longer supports the `'x86'` architecture.
 >
 > If `platform: 'x86'` is set, the [`site`](#site) input will change defaults
-> to select the final 2022-11-23 archive of `'x86'` Cygwin.
+> to select the final 2022-11-23 archive of `'x86'` Cygwin, and the
+> `--allow-unsupported-windows` option will be passed to the installer.
 >
 > Please refer to the Cygwin Installation documentation regarding
-> [how to install Cygwin on an unsupported Windows version][unsupported].
+> [the limitations of Cygwin on the x86 architecture][unsupported].
 
 Example usage:
 
@@ -238,7 +239,7 @@ Example:
 
 ### `check-sig`
 
-By default, the signature of the package manifest will be verified.
+By default, the installer will verify the signature of the package manifest.
 
 This behavior can be disabled by setting this input to `'false'`.
 
@@ -328,7 +329,7 @@ or,
 
 - Put `CYGWIN_NOWINPATH=1` into the environment
 - start a login shell with `bash --login`
-- because the profile script from does `cd ${HOME}`, either:
+- because the profile script does `cd ${HOME}`, either:
   * `cd ${GITHUB_WORKSPACE}` in your shell script, or
   * prevent the profile script from changing directory by putting
     `CHERE_INVOKING` into the environment
