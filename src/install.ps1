@@ -8,35 +8,6 @@ $vol = Get-Validated-Work-Volume -WorkVolume "$env:inputs_work_vol"
 
 $setupExe = "$vol\setup.exe"
 $setupFileName = "setup-$platform.exe"
-
-function Invoke-WebRequest-With-Retry {
-    param (
-        $Uri,
-        $OutFile
-    )
-
-    $maxRetries = 5
-    $retryCount = 0
-    $success = $false
-    $delay = 2
-
-    while (-not $success -and $retryCount -lt $maxRetries) {
-        try {
-            Invoke-WebRequest -Uri $Uri -OutFile $OutFile
-            $success = $true
-        } catch [System.Net.WebException] {
-            Write-Output "Attempt $($retryCount + 1) failed. Retrying..."
-            Start-Sleep -Seconds $delay
-            $retryCount++
-            $delay += $delay
-        }
-    }
-
-    if (-not $success) {
-        throw "Failed to download $setupFileName after $maxRetries attempts."
-    }
-}
-
 Invoke-WebRequest-With-Retry "https://cygwin.com/$setupFileName" $setupExe
 
 if ((Get-Item -LiteralPath $setupExe).Length -eq 0) {

@@ -84,6 +84,35 @@ function Get-Validated-Work-Volume {
 }
 
 
+function Invoke-WebRequest-With-Retry {
+    param (
+        $Uri,
+        $OutFile
+    )
+
+    $maxRetries = 5
+    $retryCount = 0
+    $success = $false
+    $delay = 2
+
+    while (-not $success -and $retryCount -lt $maxRetries) {
+        try {
+            Invoke-WebRequest -Uri $Uri -OutFile $OutFile
+            $success = $true
+        } catch [System.Net.WebException] {
+            Write-Output "Attempt $($retryCount + 1) failed. Retrying..."
+            Start-Sleep -Seconds $delay
+            $retryCount++
+            $delay += $delay
+        }
+    }
+
+    if (-not $success) {
+        throw "Failed to download $setupFileName after $maxRetries attempts."
+    }
+}
+
+
 # ---------------------------------------------------------------------
 # Functions below this line exist so the test suite can mock them.
 
