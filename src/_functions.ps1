@@ -91,25 +91,25 @@ function Invoke-WebRequest-With-Retry {
     )
 
     $maxRetries = 5
-    $retryCount = 0
-    $success = $false
-    $delay = 2
 
-    while (-not $success -and $retryCount -lt $maxRetries) {
+    for ($attempt = 1; $attempt -le $maxRetries; $attempt++) {
         try {
             Invoke-WebRequest -Uri $Uri -OutFile $OutFile
-            $success = $true
-        } catch [System.Net.WebException] {
-            Write-Output "Attempt $($retryCount + 1) failed. Retrying..."
-            Start-Sleep -Seconds $delay
-            $retryCount++
-            $delay += $delay
+            return
+        } catch {
+            $statusCode = $_.Exception.Response.StatusCode.value__
+            if ($attempt -ne $maxRetries) {
+                $delaySeconds = [Math]::Pow(2, $attempt)
+                Write-Output "Attempt $attempt failed (HTTP Status $statusCode). Retrying in $delaySeconds seconds..."
+                Start-Sleep -Seconds $delaySeconds
+            }
+            else {
+                Write-Output "Attempt $attempt failed (HTTP Status $statusCode)."
+            }
         }
     }
 
-    if (-not $success) {
-        throw "Failed to download $setupFileName after $maxRetries attempts."
-    }
+    throw "Failed to download '$Uri' after $maxRetries attempts."
 }
 
 
