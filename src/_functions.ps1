@@ -84,6 +84,35 @@ function Get-Validated-Work-Volume {
 }
 
 
+function Invoke-WebRequest-With-Retry {
+    param (
+        $Uri,
+        $OutFile
+    )
+
+    $maxRetries = 5
+
+    for ($attempt = 1; $attempt -le $maxRetries; $attempt++) {
+        try {
+            Invoke-WebRequest -Uri $Uri -OutFile $OutFile
+            return
+        } catch {
+            $statusCode = $_.Exception.Response.StatusCode.value__
+            if ($attempt -ne $maxRetries) {
+                $delaySeconds = [Math]::Pow(2, $attempt)
+                Write-Output "Attempt $attempt failed (HTTP Status $statusCode). Retrying in $delaySeconds seconds..."
+                Start-Sleep -Seconds $delaySeconds
+            }
+            else {
+                Write-Output "Attempt $attempt failed (HTTP Status $statusCode)."
+            }
+        }
+    }
+
+    throw "Failed to download '$Uri' after $maxRetries attempts."
+}
+
+
 # ---------------------------------------------------------------------
 # Functions below this line exist so the test suite can mock them.
 
