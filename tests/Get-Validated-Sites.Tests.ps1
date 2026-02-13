@@ -6,11 +6,11 @@ Describe 'Get-Validated-Sites' {
     Context 'Platform defaults' {
         It 'Default (x86_64)' {
             $sites = Get-Validated-Sites
-            Should -ActualValue $sites -Be @( 'https://mirrors.kernel.org/sourceware/cygwin/' )
+            Should -ActualValue $sites -Be @( 'https://www.mirrorservice.org/sites/sourceware.org/pub/cygwin' )
         }
         It 'x86' {
             $sites = Get-Validated-Sites -Platform 'x86'
-            Should -ActualValue $sites -Be @( 'https://mirrors.kernel.org/sourceware/cygwin-archive/20221123' )
+            Should -ActualValue $sites -Be @( 'https://www.mirrorservice.org/sites/sourceware.org/pub/cygwin-archive/20221123' )
         }
     }
 

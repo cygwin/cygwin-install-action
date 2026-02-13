@@ -286,7 +286,7 @@ jobs:
       with:
         site: |
           http://localhost:8080
-          http://mirrors.kernel.org/sourceware/cygwin/
+          https://www.mirrorservice.org/sites/sourceware.org/pub/cygwin/
         packages: cygwin-install-action-test
         pubkeys: ${{ github.workspace }}\tests\repo\key.pub
 

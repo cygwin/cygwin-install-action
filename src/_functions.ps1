@@ -30,9 +30,9 @@ function Get-Validated-Sites {
 
     if ("$Sites" -eq '') {
         switch ("$Platform") {
-            'x86'   { return @( 'https://mirrors.kernel.org/sourceware/cygwin-archive/20221123' ) }
+            'x86'   { return @( 'https://www.mirrorservice.org/sites/sourceware.org/pub/cygwin-archive/20221123' ) }
             # This is the default site for x86_64 platforms.
-            default { return @( 'https://mirrors.kernel.org/sourceware/cygwin/' ) }
+            default { return @( 'https://www.mirrorservice.org/sites/sourceware.org/pub/cygwin' ) }
         }
     }
 
