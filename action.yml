@@ -176,9 +176,9 @@ runs:
         if ( '${{ inputs.site }}' ) {
           $sites = '${{ inputs.site }}'
         } elseif ($platform -eq 'x86') {
-          $sites = 'http://mirrors.kernel.org/sourceware/cygwin-archive/20221123'
+          $sites = 'https://www.mirrorservice.org/sites/sourceware.org/pub/cygwin-archive/20221123'
         } else {
-          $sites = 'http://mirrors.kernel.org/sourceware/cygwin/'
+          $sites = 'https://www.mirrorservice.org/sites/sourceware.org/pub/cygwin/'
         }
         $site_list = $sites.Split('', [System.StringSplitOptions]::RemoveEmptyEntries)
         $site_list = $site_list | % { $_.Trim() }
