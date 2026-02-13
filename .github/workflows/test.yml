@@ -293,6 +293,35 @@ jobs:
     - name: Run test shell script
       run: C:\cygwin\bin\bash.exe /cygwin-install-action-test.sh
 
+  error-on-missing-packages-default:
+    name: 'Test `error-on-missing-packages`: default'
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - name: 'Install Cygwin (expect failure)'
+      id: 'install-expects-failure'
+      continue-on-error: true
+      uses: ./
+      with:
+        packages: Http404PackageDoesNotExist
+    - name: 'Verify action failure'
+      if: "${{ steps.install-expects-failure.outcome != 'failure' }}"
+      shell: 'bash'
+      run: |
+        echo '::error::The action did not fail when missing packages were detected!'
+        exit 1
+
+  error-on-missing-packages-disabled:
+    name: 'Test `error-on-missing-packages`: false'
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - name: 'Install Cygwin (expect warning)'
+      uses: ./
+      with:
+        error-on-missing-packages: 'false'
+        packages: Http404PackageDoesNotExist
+
   outputs-test:
     runs-on: windows-latest
 
