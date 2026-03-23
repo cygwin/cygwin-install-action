@@ -13,10 +13,13 @@ e.g.
   with:
     packages: |
       git
-      python3
-      python3-pip
+      python3  # End-of-life Python 3.9
+      python3-pip  # pip for end-of-life Python 3.9
+      python312  # Python 3.12, but there is no python312-lxml package
+      python312-pip  # pip for Python 3.12, but there is no python312-venv package
 
-- run: bash tests/script.sh  # see note below
+- run: tests/script.sh  # see note below
+  script: bash
 ```
 
 > [!NOTE]
@@ -24,6 +27,10 @@ e.g.
 > The [Workflow documentation][github-workflow-documentation]
 > suggests you should also use bash options `-eo pipefail`.
 > It's omitted here for clarity.
+>
+> Use `python` or `python3` to access these executables
+> because `python.exe`, `python3.exe`, and `py` access
+> other pre-installed Python executables.
 
 
 Table of Contents
@@ -69,9 +76,14 @@ Example usage:
   with:
     packages: |
       git
-      python3
-      python3-pip
+      python312
+      python312-pip
 ```
+
+> [!NOTE]
+>
+> The workflow will NOT fail if your package is not found,
+> so ensure your package exists at https://cygwin.com/packages
 
 ### `allow-test-packages`
 
