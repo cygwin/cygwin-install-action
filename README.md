@@ -82,8 +82,8 @@ Example usage:
 
 > [!NOTE]
 >
-> The workflow will NOT fail if your package is not found,
-> so ensure your package exists at https://cygwin.com/packages
+> The workflow will NOT fail if your packages are not found,
+> so ensure your packages exist at https://cygwin.com/packages
 
 ### `allow-test-packages`
 
