@@ -24,7 +24,7 @@ jobs:
     steps:
     - run: git config --global core.autocrlf input
 
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Install Cygwin
       uses: ./
@@ -88,7 +88,7 @@ jobs:
     - run: git config --global core.autocrlf input
       shell: pwsh -command ". '{0}'".
 
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Install Cygwin
       uses: ./
@@ -127,7 +127,7 @@ jobs:
     steps:
     - run: git config --global core.autocrlf input
 
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Install Cygwin
       uses: ./
@@ -167,7 +167,7 @@ jobs:
     steps:
     - run: git config --global core.autocrlf input
 
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Install Cygwin
       uses: ./
@@ -210,7 +210,7 @@ jobs:
     steps:
     - run: git config --global core.autocrlf input
 
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Install Cygwin
       uses: ./
@@ -225,7 +225,7 @@ jobs:
     steps:
     - run: git config --global core.autocrlf input
 
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Install Cygwin
       uses: ./
@@ -245,7 +245,7 @@ jobs:
     steps:
     - run: git config --global core.autocrlf input
 
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Fail to install Cygwin
       uses: ./
@@ -274,7 +274,7 @@ jobs:
     steps:
     - run: git config --global core.autocrlf input
 
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Run repo HTTP server
       uses: Eun/http-server-action@f71cec1321f665652a46c40b6852f8e5a68bfcd4 # v1.0.12
@@ -301,7 +301,7 @@ jobs:
     steps:
     - run: git config --global core.autocrlf input
 
-    - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
     - name: Install Cygwin
       id: cygwin-install
@@ -338,7 +338,7 @@ jobs:
     runs-on: "windows-latest"
     steps:
       - name: "Checkout the repository"
-        uses: "actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8" # v6.0.1
+        uses: "actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd" # v6.0.2
       - name: "Run Pester"
         run: |
           Invoke-Pester -Output Detailed ./tests
