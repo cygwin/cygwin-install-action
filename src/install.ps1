@@ -14,13 +14,8 @@ if ((Get-Item -LiteralPath $setupExe).Length -eq 0) {
     throw "The downloaded setup has a zero length!"
 }
 
-$signature = Get-AuthenticodeSignature -FilePath $setupExe
-echo "Signature status: $($signature.Status) fingerprint: $($signature.SignerCertificate.GetCertHashString("SHA256"))"
-# TBD: this should check against a list of fingerprints for valid certs we have used
-if (!$signature.Status -ne 'Valid' -or $signature.SignerCertificate.GetCertHashString("SHA256") -ne '2ce11da3a675a9d631e06a28ddfd6f730b9cc6989b43bd30ad7cc79d219cf2bd') {
-    if ("$env:inputs_check_installer_sig" -eq 'true') {
-            throw "Invalid CodeSign signature on the downloaded setup!"
-    }
+if ("$env:inputs_check_installer_sig" -ne 'false') {
+   Check-Installer-Sig -SetupExePath $setupExe
 }
 
 if ("$env:inputs_check_hash" -eq 'true') {
