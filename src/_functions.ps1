@@ -131,10 +131,7 @@ function Check-Installer-Sig {
    }
 
    # check against a list of fingerprints for valid certs we have used
-   $certhashes = (
-      '2CE11DA3A675A9D631E06A28DDFD6F730B9CC6989B43BD30AD7CC79D219CF2BD',
-      '3AB2B14363B58A1856D4902C737797C899118095F7025DF7832C1B52483865A0'
-   )
+   $certhashes = Get-CertHashes
 
    if ($signature_certhash -notin $certhashes) {
       throw "Unexpected key certificate made CodeSign signature on the downloaded setup!"
@@ -145,3 +142,10 @@ function Check-Installer-Sig {
 # Functions below this line exist so the test suite can mock them.
 
 function Get-SystemDrive { "$Env:SYSTEMDRIVE" }
+
+function Get-CertHashes {
+  (
+    '2CE11DA3A675A9D631E06A28DDFD6F730B9CC6989B43BD30AD7CC79D219CF2BD',
+    '3AB2B14363B58A1856D4902C737797C899118095F7025DF7832C1B52483865A0'
+  )
+}
