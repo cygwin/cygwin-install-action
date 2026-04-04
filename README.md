@@ -82,8 +82,10 @@ Example usage:
 
 > [!NOTE]
 >
-> The workflow will NOT fail if your packages are not found,
-> so ensure your packages exist at https://cygwin.com/packages
+> For historical reasons and due to limitations of the current implementation,
+> the installer only *warns* if any of the specified packages cannot be found
+> (which may subsequently lead to confusing errors in the workflow). You can
+> verify package names at https://cygwin.com/packages .
 
 ### `allow-test-packages`
 
