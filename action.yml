@@ -9,6 +9,14 @@ inputs:
   packages:
     description: Packages to install
     required: false
+  error-on-missing-packages:
+    description: |
+      By default, all packages listed in the `packages` input must install successfully.
+      If any packages fail to install for any reason, the action will fail with an error.
+
+      Setting this to "false" downgrades errors to warnings to allow the action to succeed.
+    required: false
+    default: 'true'
   install-dir:
     # For consistency and simplicity, install to <work-dir>:\cygwin rather
     # than to the platform dependent default (e.g. <work-dir>:\cygwin64)
@@ -64,6 +72,7 @@ runs:
       env:
         inputs_platform: "${{ inputs.platform }}"
         inputs_packages: "${{ inputs.packages }}"
+        inputs_error_on_missing_packages: "${{ inputs.error-on-missing-packages }}"
         inputs_install_dir: "${{ inputs.install-dir }}"
         inputs_check_sig: "${{ inputs.check-sig }}"
         inputs_pubkeys: "${{ inputs.pubkeys }}"
