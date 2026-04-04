@@ -45,6 +45,10 @@ inputs:
     description: Volume on which to store setup and packages, and install Cygwin
     required: false
     default: ''
+  package-cache:
+    description: Package cache directory
+    required: false
+    default: ''
 
 outputs:
   setup:
@@ -73,6 +77,7 @@ runs:
         inputs_check_hash: "${{ inputs.check-hash }}"
         inputs_check_installer_sig: "${{ inputs.check-installer-sig }}"
         inputs_work_vol: "${{ inputs.work-vol }}"
+        inputs_package_cache_dir: "${{ inputs.package-cache }}"
       run: |
         & $Env:GITHUB_ACTION_PATH\src\install.ps1
       shell: powershell

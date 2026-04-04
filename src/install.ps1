@@ -47,6 +47,9 @@ if ("$env:inputs_install_dir" -ne '') {
 }
 
 $packageDir = "$vol\cygwin-packages"
+if ("$env:inputs_package_cache_dir" -ne '') {
+    $packageDir = "$env:inputs_package_cache_dir"
+}
 
 $packages = "$env:inputs_packages"
 $pkg_list = $packages.Split('', [System.StringSplitOptions]::RemoveEmptyEntries)

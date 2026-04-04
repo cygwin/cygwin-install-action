@@ -42,12 +42,13 @@ Table of Contents
   * [`check-hash`](#check-hash)
   * [`check-installer-sig`](#check-installer-sig)
   * [`check-sig`](#check-sig)
+  * [`package-cache`](#package-cache)
 
 * [Outputs](#outputs)
 
   * [`root`](#root)
   * [`setup`](#setup)
-  * [`package-cache`](#package-cache)
+  * [`package-cache`](#package-cache-output)
 
 * [Line endings](#line-endings)
 * [PATH](#path)
@@ -265,6 +266,20 @@ Example:
     check-sig: 'true'  # Change to 'false' only if required.
 ```
 
+### `package-cache`
+
+The absolute path to the package cache directory.
+
+The default package cache directory is `'D:\cygwin-packages'`,
+based on the [`work-vol`](#work-vol) input.
+
+Example:
+
+```yaml
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    package-cache: ${{ runner.temp }}/cygwin-packages
+```
 
 Outputs
 -------
@@ -280,6 +295,7 @@ By default, this value will be `'D:\cygwin'`, but it is affected by the
 
 The absolute path to the Cygwin installer.
 
+<a name="package-cache-output"></a>
 ### `package-cache`
 
 The absolute path to the package cache directory.
