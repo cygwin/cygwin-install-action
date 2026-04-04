@@ -25,10 +25,6 @@ e.g.
 > The [Workflow documentation][github-workflow-documentation]
 > suggests you should also use bash options `-eo pipefail`.
 > It's omitted here for clarity.
->
-> Use `python` or `python3` to access these executables
-> because `python.exe`, `python3.exe`, and `py` access
-> other pre-installed Python executables.
 
 
 Table of Contents
