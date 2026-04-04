@@ -13,8 +13,6 @@ e.g.
   with:
     packages: |
       git
-      python3  # End-of-life Python 3.9
-      python3-pip  # pip for end-of-life Python 3.9
       python312  # Python 3.12
       python312-pip  # pip for Python 3.12
 
