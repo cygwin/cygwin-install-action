@@ -337,6 +337,53 @@ jobs:
         ROOT: ${{ steps.cygwin-install.outputs.root }}
         CACHE: ${{ steps.cygwin-install.outputs.package-cache }}
 
+  package-cache-test:
+    runs-on: windows-latest
+
+    name: 'Package caching example'
+
+    steps:
+    - run: git config --global core.autocrlf input
+
+    - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+    - uses: actions/cache/restore@v5
+      with:
+        path: ${{ runner.temp }}\cygwin-packages
+        key: cygwin-packages-0  # never matches, but syntactically required
+        restore-keys: cygwin-packages-
+
+    - name: Install Cygwin
+      id: cygwin-install
+      uses: ./
+      with:
+        package-cache: ${{ runner.temp }}\cygwin-packages
+
+    # It seems like the cache action doesn't provide a way to natively hash the
+    # directory it's caching (and hashFiles appears to be useless for that
+    # purpose, since it refuses to work outside of GITHUB_WORKSPACE), so roll
+    # our own.
+    #
+    # We just hash file name and size of all files in the package cache
+    # (ignoring the contents for performance, and timestamp because setup always
+    # touches setup.ini). If setup wrote some sort of package cache index, we'd
+    # just use the hash of that instead!
+    - name: Compute package cache hash
+      id: cygwin-package-cache-hash
+      run: |
+        cache_dir=$(cygpath -ua "${{ steps.cygwin-install.outputs.package-cache }}")
+        hash=$(find ${cache_dir} -type f -exec stat -c '%n %s' {} + | sha256sum | cut -d' ' -f1)
+        echo "hash=$hash" >> ${GITHUB_OUTPUT}
+      shell: bash -o igncr '{0}'
+
+    - uses: actions/cache/save@v5
+      # XXX: maybe don't do this if the key we're going to use is the same as
+      # cache-matched-key to avoid warning?
+      if: always()
+      with:
+        path: ${{ runner.temp }}\cygwin-packages
+        key: cygwin-packages-${{ steps.cygwin-package-cache-hash.outputs.hash }}
+
   pester:
     name: "Pester test suite"
     runs-on: "windows-latest"
