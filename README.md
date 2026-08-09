@@ -13,10 +13,11 @@ e.g.
   with:
     packages: |
       git
-      python3
-      python3-pip
+      python312  # Python 3.12
+      python312-pip  # pip for Python 3.12
 
-- run: bash tests/script.sh  # see note below
+- run: tests/script.sh  # see note below
+  script: bash
 ```
 
 > [!NOTE]
@@ -69,8 +70,8 @@ Example usage:
   with:
     packages: |
       git
-      python3
-      python3-pip
+      python312
+      python312-pip
 ```
 
 > [!NOTE]
