@@ -42,12 +42,14 @@ Table of Contents
   * [`check-hash`](#check-hash)
   * [`check-installer-sig`](#check-installer-sig)
   * [`check-sig`](#check-sig)
+  * [`package-cache`](#package-cache)
 
 * [Outputs](#outputs)
 
   * [`root`](#root)
   * [`setup`](#setup)
-  * [`package-cache`](#package-cache)
+  * [`package-cache`](#package-cache-output)
+  * [`package-cache-hash`](#package-cache-hash)
 
 * [Line endings](#line-endings)
 * [PATH](#path)
@@ -265,6 +267,20 @@ Example:
     check-sig: 'true'  # Change to 'false' only if required.
 ```
 
+### `package-cache`
+
+The absolute path to the package cache directory.
+
+The default package cache directory is `'D:\cygwin-packages'`,
+based on the [`work-vol`](#work-vol) input.
+
+Example:
+
+```yaml
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    package-cache: ${{ runner.temp }}/cygwin-packages
+```
 
 Outputs
 -------
@@ -280,10 +296,15 @@ By default, this value will be `'D:\cygwin'`, but it is affected by the
 
 The absolute path to the Cygwin installer.
 
+<a name="package-cache-output"></a>
 ### `package-cache`
 
 The absolute path to the package cache directory.
 
+### `package-cache-hash`
+
+A hash for the package cache directory, suitable for use as a key in
+`actions/cache`. (See this [test][cache-test] for an example of its use).
 
 Line endings
 ------------
@@ -371,3 +392,4 @@ circumstances, such as using the [Cygwin Time Machine][cygwin-time-machine].
 [github-workflow-documentation]: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#exit-codes-and-error-action-preference
 [cygwin-time-machine]: http://www.crouchingtigerhiddenfruitbat.org/Cygwin/timemachine.html
 [unsupported]: https://cygwin.com/install.html#unsupported
+[cache-test]: /.github/workflows/test.yml#340
