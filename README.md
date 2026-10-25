@@ -9,7 +9,7 @@ e.g.
 - run: git config --global core.autocrlf input
 - uses: actions/checkout@v6
 
-- uses: cygwin/cygwin-install-action@v6
+- uses: cygwin/cygwin-install-action@v7
   with:
     packages: |
       git
