@@ -60,6 +60,9 @@ outputs:
   package-cache:
     description: Package cache directory
     value: ${{ steps.cygwin-install-action.outputs.package-cache }}
+  package-cache-hash:
+    description: Package cache directory hash
+    value: ${{ steps.cygwin-install-action.outputs.package-cache-hash }}
 
 runs:
   using: "composite"

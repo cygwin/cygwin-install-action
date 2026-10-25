@@ -110,7 +110,29 @@ if ("$env:inputs_add_to_path" -eq 'true') {
 # run login shell to copy skeleton profile files
 & "$installDir\bin\bash.exe" --login
 
+# Compute a hash for the package cache
+#
+# It seems like the cache action doesn't provide a way to natively hash the
+# directory it's caching (and hashFiles appears to be useless for that
+# purpose, since it refuses to work outside of GITHUB_WORKSPACE), so roll
+# our own.
+#
+# We just hash the file name and size of all files in the package cache
+# (ignoring the contents for performance, and the timestamp because setup
+# always touches setup.ini). If setup wrote some sort of package cache
+# index, we'd just use the hash of that instead!
+$cmd= @"
+  cache_dir=`$(cygpath -ua "$packageDir");
+  find "`${cache_dir}" -type f -exec stat -c '%n %s' {} + | sha256sum | cut -d' ' -f1
+"@
+
+$env:CYGWIN_NOWINPATH = "1"
+$hash = & "$installDir\bin\bash.exe" -lc "$cmd"
+$hash = $hash.Trim()
+echo "package cache directory hash is $hash"
+
 # set outputs
 echo "setup=$setupExe" >> $env:GITHUB_OUTPUT
 echo "root=$installDir" >> $env:GITHUB_OUTPUT
 echo "package-cache=$packageDir" >> $env:GITHUB_OUTPUT
+echo "package-cache-hash=$hash" >> $env:GITHUB_OUTPUT
