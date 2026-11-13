@@ -313,9 +313,10 @@ jobs:
 
     - name: Verify Outputs
       run: |
-        echo "setup executable is at: ${SETUP}"
+        echo "cygwin setup executable is at: ${SETUP}"
         echo "cygwin install root directory is: ${ROOT}"
         echo "cygwin package cache directory is: ${CACHE}"
+        echo "cygwin package cache hash is: ${HASH}"
 
         if [[ "${SETUP}" != "D:\setup.exe" ]]; then
           echo "unexpected value for 'setup' output"
@@ -331,11 +332,50 @@ jobs:
           echo "unexpected value for 'package-cache' output"
           exit 1
         fi
+
+        if [[ "${HASH}" == "" ]]; then
+          echo "unexpected value for 'package-cache-hash' output"
+          exit 1
+        fi
+
       shell: bash -o igncr '{0}'
       env:
         SETUP: ${{ steps.cygwin-install.outputs.setup }}
         ROOT: ${{ steps.cygwin-install.outputs.root }}
         CACHE: ${{ steps.cygwin-install.outputs.package-cache }}
+        HASH: ${{ steps.cygwin-install.outputs.package-cache-hash }}
+
+  package-cache-test:
+    runs-on: windows-latest
+
+    name: 'Package caching example'
+
+    steps:
+    - run: git config --global core.autocrlf input
+
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+    - uses: actions/cache/restore@v5
+      id: cygwin-cache-restore
+      with:
+        path: ${{ runner.temp }}\cygwin-packages
+        key: cygwin-packages-0  # never matches, but syntactically required
+        restore-keys: cygwin-packages-
+
+    - name: Install Cygwin
+      id: cygwin-install
+      uses: ./
+      with:
+        package-cache: ${{ runner.temp }}\cygwin-packages
+
+    - uses: actions/cache/save@v5
+      # don't do this if the cache-key we're going to use is the same as
+      # cache-matched-key (i.e. cache contents are unchanged) as the action just
+      # warns that the cache-key already exists in that case)
+      if: always() && steps.cygwin-cache-restore.output.cache-matched-key != 'cygwin-packages-${{ steps.cygwin-install.outputs.package-cache-hash }}'
+      with:
+        path: ${{ runner.temp }}\cygwin-packages
+        key: cygwin-packages-${{ steps.cygwin-install.outputs.package-cache-hash }}
 
   pester:
     name: "Pester test suite"
