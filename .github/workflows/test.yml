@@ -356,6 +356,7 @@ jobs:
     - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
 
     - uses: actions/cache/restore@v5
+      id: cygwin-cache-restore
       with:
         path: ${{ runner.temp }}\cygwin-packages
         key: cygwin-packages-0  # never matches, but syntactically required
@@ -368,9 +369,10 @@ jobs:
         package-cache: ${{ runner.temp }}\cygwin-packages
 
     - uses: actions/cache/save@v5
-      # XXX: maybe don't do this if the key we're going to use is the same as
-      # cache-matched-key to avoid warning?
-      if: always()
+      # don't do this if the cache-key we're going to use is the same as
+      # cache-matched-key (i.e. cache contents are unchanged) as the action just
+      # warns that the cache-key already exists in that case)
+      if: always() && steps.cygwin-cache-restore.output.cache-matched-key != 'cygwin-packages-${{ steps.cygwin-install.outputs.package-cache-hash }}'
       with:
         path: ${{ runner.temp }}\cygwin-packages
         key: cygwin-packages-${{ steps.cygwin-install.outputs.package-cache-hash }}
