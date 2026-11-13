@@ -313,9 +313,10 @@ jobs:
 
     - name: Verify Outputs
       run: |
-        echo "setup executable is at: ${SETUP}"
+        echo "cygwin setup executable is at: ${SETUP}"
         echo "cygwin install root directory is: ${ROOT}"
         echo "cygwin package cache directory is: ${CACHE}"
+        echo "cygwin package cache hash is: ${HASH}"
 
         if [[ "${SETUP}" != "D:\setup.exe" ]]; then
           echo "unexpected value for 'setup' output"
@@ -331,11 +332,18 @@ jobs:
           echo "unexpected value for 'package-cache' output"
           exit 1
         fi
+
+        if [[ "${HASH}" == "" ]]; then
+          echo "unexpected value for 'package-cache-hash' output"
+          exit 1
+        fi
+
       shell: bash -o igncr '{0}'
       env:
         SETUP: ${{ steps.cygwin-install.outputs.setup }}
         ROOT: ${{ steps.cygwin-install.outputs.root }}
         CACHE: ${{ steps.cygwin-install.outputs.package-cache }}
+        HASH: ${{ steps.cygwin-install.outputs.package-cache-hash }}
 
   package-cache-test:
     runs-on: windows-latest
