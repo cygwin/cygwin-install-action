@@ -10,6 +10,9 @@ Describe 'Get-Validated-Platform' {
         It 'x86' {
             Get-Validated-Platform -Platform 'x86' | Should -Be 'x86'
         }
+        It 'aarch64' {
+            Get-Validated-Platform -Platform 'aarch64' | Should -Be 'aarch64'
+        }
     }
 
     Context 'backwards-compatibility strings' {
@@ -21,6 +24,9 @@ Describe 'Get-Validated-Platform' {
         }
         It 'x64' {
             Get-Validated-Platform -Platform 'x64' | Should -Be 'x86_64'
+        }
+        It 'arm64' {
+            Get-Validated-Platform -Platform 'arm64' | Should -Be 'aarch64'
         }
     }
 

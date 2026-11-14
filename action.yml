@@ -3,7 +3,7 @@ description: GitHub Action to install Cygwin
 
 inputs:
   platform:
-    description: Platform [x86, x86_64]
+    description: Platform [x86, x86_64, aarch64]
     required: false
     default: x86_64
   packages:

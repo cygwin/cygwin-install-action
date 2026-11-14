@@ -132,7 +132,8 @@ Example:
 
 Select the architecture to install.
 
-`'x86_64'` is the default value, but `'x86'` can also be specified.
+`'x86_64'` is the default value, but `'aarch64'` or `'x86'` can also be
+specified.
 
 > [!NOTE]
 >

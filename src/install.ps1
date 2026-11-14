@@ -7,7 +7,16 @@ $platform = Get-Validated-Platform -Platform "$env:inputs_platform"
 $vol = Get-Validated-Work-Volume -WorkVolume "$env:inputs_work_vol"
 
 $setupExe = "$vol\setup.exe"
-$setupFileName = "setup-$platform.exe"
+
+# (Currently, no aarch64 build of the installer exists, so use the x86_64 build
+#  instead, with a suitable --arch option)
+if ($platform -eq 'aarch64') {
+  $installerArch = "x86_64"
+} else {
+  $installerArch = "$platform"
+}
+$setupFileName = "setup-$installerArch.exe"
+
 Invoke-WebRequest-With-Retry "https://cygwin.com/$setupFileName" $setupExe
 
 if ((Get-Item -LiteralPath $setupExe).Length -eq 0) {
@@ -56,7 +65,8 @@ $pkg_list = $pkg_list | % { $_.Trim(',') }
 $args = @(
  '-qnO',
  '-l', "$packageDir",
- '-R', "$installDir"
+ '-R', "$installDir",
+ '--arch', "$platform"
 )
 
 if ( "$env:inputs_allow_test_packages" -eq 'true' ) {
@@ -94,8 +104,9 @@ if ($platform -eq 'x86') {
 
 Invoke-Cygwin-Setup -SetupExePath $setupExe -SetupExeArgs $args
 
-if ("$env:inputs_work_vol" -eq '' -and "$env:inputs_install_dir" -eq '') {
-    # Create a symlink for compatibility with previous versions of this
+if ("$env:inputs_work_vol" -eq '' -and "$env:inputs_install_dir" -eq '' -and "$vol" -ne 'C:') {
+    # If configuration is default, and we didn't install to C:
+    # create a symlink for compatibility with previous versions of this
     # action, just in case something relies upon C:\cygwin existing
     cmd /c mklink /d C:\cygwin $installDir
 }

@@ -4,22 +4,27 @@ on: [push, pull_request]
 
 jobs:
   test:
-    runs-on: windows-latest
     strategy:
        matrix:
          include:
            - platform: 'x86_64'
+             runner: windows-latest
            - platform: 'x86'
+             runner: windows-latest
              packages: >-
                coreutils
                moreutils
            - platform: 'amd64'
+             runner: windows-latest
              packages: |
                coreutils,
                moreutils
+           - platform: 'aarch64'
+             runner: windows-11-arm
        fail-fast: false
 
     name: 'Test ${{ matrix.platform }}'
+    runs-on: ${{ matrix.runner }}
 
     steps:
     - run: git config --global core.autocrlf input
@@ -31,30 +36,43 @@ jobs:
       with:
         platform: ${{ matrix.platform }}
         packages: ${{ matrix.packages }}
-        add-to-path: false
 
     - name: Explicitly running shell
-      run: D:\cygwin\bin\bash -lc "echo 'Explicitly run shell'"
+      run: bash -lc "echo 'Explicitly run shell'"
 
     - name: Explicitly running shell via compat symlink
       run: C:\cygwin\bin\bash -lc "echo 'Explicitly run shell (compat)'"
 
     - name: Single-line inline shell
       run: echo "Running in $(pwd)"
-      shell: D:\cygwin\bin\bash.exe '{0}'
+      shell: bash.exe '{0}'
 
     - name: Multiline inline shell
       run: >-
         echo "Running in $(pwd)" &&
         true
-      shell: D:\cygwin\bin\bash.exe '{0}'
+      shell: bash.exe '{0}'
 
     - name: Shell script
-      run: D:\cygwin\bin\bash.exe tests/script.sh
+      run: bash.exe tests/script.sh
 
     - name: Check requested packages got installed
-      run: D:\cygwin\bin\sponge.exe tmp
+      run: sponge.exe tmp
       if: contains(matrix.packages, 'moreutils')
+
+  not-in-path-test:
+    runs-on: windows-latest
+    name: 'Not-in-path test'
+
+    steps:
+    - run: git config --global core.autocrlf input
+
+    - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+
+    - name: Install Cygwin
+      uses: ./
+      with:
+        add-to-path: false
 
     - name: Check PATH hasn't changed
       run: |
@@ -84,7 +102,7 @@ jobs:
 
     defaults:
       run:
-        shell: C:\cygwin\bin\bash.exe --noprofile --norc -o igncr -eo pipefail '{0}'
+        shell: bash --noprofile --norc -o igncr -eo pipefail '{0}'
 
     steps:
     - run: git config --global core.autocrlf input
@@ -238,7 +256,7 @@ jobs:
     - name: Check cygwin version
       run: |
         cygcheck -cd cygwin | grep -qF 3.1.7-1
-      shell: C:\cygwin\bin\bash.exe --noprofile --norc -o igncr -eo pipefail '{0}'
+      shell: bash --noprofile --norc -o igncr -eo pipefail '{0}'
 
   bad-sig:
     runs-on: windows-latest
@@ -295,7 +313,7 @@ jobs:
         pubkeys: ${{ github.workspace }}\tests\repo\key.pub
 
     - name: Run test shell script
-      run: C:\cygwin\bin\bash.exe /cygwin-install-action-test.sh
+      run: bash /cygwin-install-action-test.sh
 
   outputs-test:
     runs-on: windows-latest
