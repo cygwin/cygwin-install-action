@@ -53,6 +53,7 @@ Table of Contents
 * [PATH](#path)
 * [Symlinks](#symlinks)
 * [Mirrors and signatures](#mirrors-and-signatures)
+* [Using a static Cygwin distribution](#using-a-static-Cygwin-distribution)
 
 
 Inputs
@@ -79,6 +80,20 @@ Example usage:
 > the installer only *warns* if any of the specified packages cannot be found
 > (which may subsequently lead to confusing errors in the workflow). You can
 > verify package names at https://cygwin.com/packages .
+
+> [!NOTE]
+>
+> A version constraint may follow the package name
+> e.g. `flex=2.6.4-2`. Currently, the only constraint supported by the installer
+> is `=` (equal to).
+>
+> Since Cygwin uses a rolling distribution, such constraints should only be used
+> temporarily (e.g. to avoid a buggy package while a fix is worked on), since it
+> will no longer be satisfiable at some future time, after the specified version
+> is expired from the Cygwin package repository.
+>
+> (See the [Cygwin Time Machine](#using-a-static-Cygwin-distribution) example
+> below for an alternative)
 
 ### `allow-test-packages`
 
@@ -368,6 +383,27 @@ These options are very unlikely to be useful except in some very isolated
 circumstances, such as using the [Cygwin Time Machine][cygwin-time-machine].
 
 
+Using a static Cygwin distribution
+----------------------------------
+
+If you want to isolate your use of this action from changes in Cygwin's rolling
+distribution, you can configure it use a Cygwin archive from a specific point in
+time provided by the Cygwin Time Machine.
+
+Locate the appropriate point in time (a "circa") you want to travel back to in
+the [index][ctm-index], and use the URL provided there as the `site` parameter
+for this action.
+
+Example:
+
+```yaml
+- uses: 'cygwin/cygwin-install-action@<version>'
+  with:
+    site: http://ctm.crouchingtigerhiddenfruitbat.org/pub/cygwin/circa/64bit/2021/01/22/181752
+    check-sig: false
+```
+
 [github-workflow-documentation]: https://docs.github.com/en/actions/reference/workflow-syntax-for-github-actions#exit-codes-and-error-action-preference
 [cygwin-time-machine]: http://www.crouchingtigerhiddenfruitbat.org/Cygwin/timemachine.html
 [unsupported]: https://cygwin.com/install.html#unsupported
+[ctm-index]: http://ctm.crouchingtigerhiddenfruitbat.org/pub/cygwin/circa/64bit/index.html
